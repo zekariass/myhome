@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.conf import settings
 from django.utils import timezone
 
-
+"""User group"""
 class MyHomeUserGroup(models.Model):
     name = models.CharField(verbose_name='user group', max_length=50, blank=False, unique=True)
     description = models.TextField()
@@ -69,3 +70,50 @@ class MyHomeUser(AbstractBaseUser):
     def has_module_perms(self, app_label):
         '''Check if the user has module level permission'''
         return True
+
+
+"""This class allows to track the login history of users. Every time a user logs in to the 
+        system new record is added to this table"""
+class LoginHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="login_historys")
+    logged_in_on = models.DateTimeField(default=timezone.now, editable=False)
+    logged_out_on = models.DateTimeField(default=timezone.now, editable=False, null=True)
+
+    @property
+    def is_logged_in(self):
+        if self.logged_in_on is not None and self.logged_out_on is None:
+            return True
+
+
+class Permission(models.Model):
+    name = models.CharField(max_length=50, unique=True, null=False, blank=False)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=50, unique=True, null=False, blank=False)
+    permission = models.ManyToManyField(Permission, verbose_name="permissions in this role")
+
+    def __str__(self):
+        return self.name
+
+
+class SystemAdminGroup(models.Model):
+    name = models.CharField(max_length=50, unique=True, null=False, blank=False)
+    role = models.ManyToManyField(Role, verbose_name="roles in this group", related_name="roles")
+
+    def __str__(self):
+        return self.name
+
+
+class SystemAdmin(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="parent user")
+    admin_group = models.OneToOneField(SystemAdminGroup, on_delete=models.CASCADE)
+    second_password = models.CharField(verbose_name="Second password of the admin", max_length=30, null=True, blank=True)
+    use_sec_pass_for_login = models.BooleanField(verbose_name="use second password for login?", default=True)
+
+    def __str__(self):
+        return self.user.first_name

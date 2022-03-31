@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 """Country models for countries used in the system"""
 class Country(models.Model):
@@ -48,3 +50,12 @@ class Address(models.Model):
 
     def __str__(self):
         return '%s %s' % (self.street, self. post_code)
+
+"""Periodicity is used to set a period for a specific purpose, such as daily, weekly, monthly, and annual subscriptions"""
+class Periodicity(models.Model):
+    period = models.CharField(verbose_name="period label or name", max_length=30)
+    num_of_days = models.IntegerField(verbose_name="number of days in this period", default=1)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.period

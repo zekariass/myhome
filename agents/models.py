@@ -23,7 +23,7 @@ class AgentLogo(models.Model):
 """Agent is who list properties to the system"""
 class Agent(models.Model):
     name = models.CharField(verbose_name='agent name', max_length=100, blank=False, null=False)
-    manager = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    # manager = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     address = models.OneToOneField(cmn_models.Address, on_delete=models.SET_NULL, null=True)
     email = models.EmailField(verbose_name='contact email address', null=False, blank=False)
     contact_number = models.CharField(verbose_name='contact phone number', max_length=50, null=False, blank=False)
@@ -38,7 +38,8 @@ class Agent(models.Model):
 """Aditional admin users added by the main agent administrator"""
 class AgentAdmin(models.Model):
     agent = models.ForeignKey(Agent, on_delete=models.CASCADE, verbose_name='agent where admin works')
-    admin = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    admin = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    is_manager = models.BooleanField(verbose_name="is admin the main manager?", default=False)
     date_added = models.DateField(default=timezone.now, editable=False)
 
     def __str__(self):
@@ -56,3 +57,18 @@ class AgentMessagePreference(models.Model):
         return 'inapp=%s, sms=%s, email=%s' % (self.opt_out_in_app_message, self.opt_out_sms_message, self.opt_out_email_message)
 
     
+"""In-System message that is sent between the user and agent and agent and system admin"""
+class Message(models.Model):
+    SENDER_PARTY = [
+        ("USER", "User"),
+        ("AGENT", "Agent")
+    ]
+    initiator_uer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages")
+    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name='received_messages')
+    sender_party = models.CharField(verbose_name="Who send the message?", choices=SENDER_PARTY, null=False, max_length=50)
+    message = models.TextField(null=False, blank=False)
+    sent_on = models.DateTimeField(default=timezone.now, editable=False)
+    read = models.BooleanField(verbose_name="Does the receiver read the message?", default=False)
+
+    def __str__(self):
+        return self.message

@@ -1,8 +1,9 @@
 from django.contrib import admin
-from commons import models
+from commons import models as cmn_models
 
 
-admin.site.register(models.Country)
-admin.site.register(models.Region)
-admin.site.register(models.City)
-admin.site.register(models.Address)
+admin.site.register(cmn_models.Country)
+admin.site.register(cmn_models.Region)
+admin.site.register(cmn_models.City)
+admin.site.register(cmn_models.Address)
+admin.site.register(cmn_models.Periodicity)

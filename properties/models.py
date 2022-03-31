@@ -275,11 +275,11 @@ class CommercialPropertyUnit(models.Model):
 
 
 """Hall is a wide room used for meetings and various ceremonies"""
-class Hall(property):
+class Hall(Property):
     storey = models.IntegerField(verbose_name='Hall storey level', default=0)
     number_of_seats = models.IntegerField(verbose_name='how many seats it has?', default=5)
     total_capacity = models.IntegerField(verbose_name='total capacity including standing', default=5)
-    hall_description = models.TextField()
+    hall_description = models.TextField(null=False, blank=False)
 
     def __str__(self):
         return '%s seats hall' % (self.number_of_seats)
