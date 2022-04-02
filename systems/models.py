@@ -21,7 +21,7 @@ def get_system_asset_path(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"systems/static/assets/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"systems/assets/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 """The system may be configurable with a variety of assets, such as pictures for logo, slider, etc"""

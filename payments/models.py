@@ -81,13 +81,13 @@ def get_bank_reciept_file_path(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"payments/static/media/bank/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"payments/bank/reciepts/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 def get_mobile_reciept_file_path(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"payments/static/media/mobile/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"payments/mobile/reciepts/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 

@@ -9,7 +9,7 @@ def get_agent_logo_file_path(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"agents/static/media/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"agents/logos/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 """Logo image for the agent"""

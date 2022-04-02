@@ -374,21 +374,21 @@ def get_property_image_name(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"properties/static/media/images/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"properties/images/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 def get_property_video_name(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"properties/static/media/videos/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"properties/videos/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 def get_property_virtual_file_name(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"properties/static/media/virtuals/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"properties/virtuals/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 """Show up images of a property. A property may have one or more images uploaded"""
