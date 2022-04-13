@@ -3,14 +3,19 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
 from django.utils import timezone
 
-"""User group"""
+
 class MyHomeUserGroup(models.Model):
+    """
+    User group
+    """
     name = models.CharField(verbose_name='user group', max_length=50, blank=False, unique=True)
     description = models.TextField()
 
 
-"""User manager for the custom user model"""
 class MyHomeUserManager(BaseUserManager):
+    """
+    User manager for the custom user model
+    """
     def create_superuser(self, email, first_name, last_name, password, **extra_fields):
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_blocked', False)
@@ -35,8 +40,10 @@ class MyHomeUserManager(BaseUserManager):
         return user
         
 
-"""Custom user model which replaces built is User model"""
 class MyHomeUser(AbstractBaseUser):
+    """
+    Custom user model which replaces built is User model
+    """
     first_name = models.CharField(max_length=30, blank=False, null=False)
     last_name = models.CharField(max_length=30, blank=False, null=False)
     email = models.EmailField(verbose_name='email address', unique=True, blank=False, null=False)
@@ -72,9 +79,11 @@ class MyHomeUser(AbstractBaseUser):
         return True
 
 
-"""This class allows to track the login history of users. Every time a user logs in to the 
-        system new record is added to this table"""
 class LoginHistory(models.Model):
+    """
+    This class allows to track the login history of users. Every time a user logs in to the 
+    system new record is added to this table
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="login_historys")
     logged_in_on = models.DateTimeField(default=timezone.now, editable=False)
     logged_out_on = models.DateTimeField(default=timezone.now, editable=False, null=True)
