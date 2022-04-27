@@ -6,8 +6,8 @@ from django.utils import timezone
 class Country(models.Model):
     name = models.CharField(verbose_name='country name', max_length=50, unique=True, blank=False, null=False)
     code = models.CharField(verbose_name='country code', max_length=10, blank=True)
-    latitute = models.CharField(verbose_name='geo latitude', max_length=20)
-    longitude = models.CharField(verbose_name='geo logitude', max_length=20)
+    latitute = models.CharField(verbose_name='geo latitude', max_length=20, null=True, blank=True)
+    longitude = models.CharField(verbose_name='geo logitude', max_length=20, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -17,8 +17,8 @@ class Region(models.Model):
     name = models.CharField(verbose_name='region name', max_length=50, blank=False, null=False)
     country = models.ForeignKey(Country, related_name='regions', on_delete=models.CASCADE, verbose_name='country of region')
     code = models.CharField(verbose_name='region code', max_length=10, blank=True)
-    latitute = models.CharField(verbose_name='geo logitude', max_length=20)
-    longitude = models.CharField(verbose_name='geo logitude', max_length=20)
+    latitute = models.CharField(verbose_name='geo logitude', max_length=20, null=True, blank=True)
+    longitude = models.CharField(verbose_name='geo logitude', max_length=20, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -29,8 +29,8 @@ class City(models.Model):
     country = models.ForeignKey(Country, related_name='country_cities', verbose_name='country of city', on_delete=models.CASCADE)
     region = models.ForeignKey(Region, related_name='region_cities', verbose_name='region of city', on_delete=models.CASCADE)
     code = models.CharField(verbose_name='city code', max_length=10, blank=True)
-    latitute = models.CharField(verbose_name='geo latitued', max_length=20)
-    longitude = models.CharField(verbose_name='geo longitude', max_length=20)
+    latitute = models.CharField(verbose_name='geo latitued', max_length=20, null=True, blank=True)
+    longitude = models.CharField(verbose_name='geo longitude', max_length=20, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -45,8 +45,8 @@ class Address(models.Model):
     post_code = models.CharField(max_length=20, blank=True, null=True)
     building_name_or_number = models.CharField(verbose_name='building name or number', max_length=50, blank=True, null=True)
     room_number = models.CharField(max_length=20, blank=True, null=True)
-    latitute = models.CharField(verbose_name='geo latitued', max_length=20)
-    longitude = models.CharField(verbose_name='geo longitude', max_length=20)
+    latitute = models.CharField(verbose_name='geo latitued', max_length=20, null=True, blank=True)
+    longitude = models.CharField(verbose_name='geo longitude', max_length=20, null=True, blank=True)
 
     def __str__(self):
         return '%s %s' % (self.street, self. post_code)

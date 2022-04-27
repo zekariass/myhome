@@ -44,7 +44,8 @@ class MyHomeUserListCreateView(generics.ListCreateAPIView):
         
         user_model = u_models.MyHomeUser
         if user_model.objects.filter(email=email).exists():
-            return Response(data="User with this email already registered, please signin or use different email!")
+            return Response(data="User with this email already registered, please signin or use different email!", 
+                            status=status.HTTP_404_NOT_FOUND)
 
         user_serializer = self.get_serializer(data=user_data)
         print("USER: ",user_serializer)
