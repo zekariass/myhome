@@ -48,7 +48,7 @@ class MyHomeUserListCreateView(generics.ListCreateAPIView):
                             status=status.HTTP_404_NOT_FOUND)
 
         user_serializer = self.get_serializer(data=user_data)
-        print("USER: ",user_serializer)
+        # print("USER: ",user_serializer)
         if user_serializer.is_valid():
             saved_instance = user_serializer.save()
             saved_instance.set_password(password)

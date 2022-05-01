@@ -25,6 +25,9 @@ class CitySerializer(ModelSerializer):
 
 
 class AddressSerializer(ModelSerializer):
+    city = CitySerializer()
+    region = RegionSerializer()
+    country = CountrySerializer()
     class Meta:
         model = cmn_models.Address
         fields = "__all__"
