@@ -27,10 +27,11 @@ class AgentCreateView(generics.CreateAPIView):
             # Check if the request user has attached agent already
             agent_with_request_user = agnt_models.AgentAdmin.objects.get(admin=request.user)
         except agnt_models.AgentAdmin.DoesNotExist:
-
             if agent_with_request_user is None:
-                agent_address = request.data['agentAddress']
-                agent_data = request.data['agentData']
+               
+                agent_address = request.data.pop('address')
+                agent_data = request.data
+                print("agent_address: ",agent_address, "agent_data", agent_data)
 
                 # Get agent and address objects from DB
                 country = cmn_models.Country.objects.get(pk=agent_address['country'])
@@ -38,7 +39,7 @@ class AgentCreateView(generics.CreateAPIView):
                 city = cmn_models.City.objects.get(pk=agent_address['city'])
                 
                 #Deserialize Address data
-                address_serializer = cmn_serializers.AddressSerializer(data=agent_address)
+                address_serializer = cmn_serializers.AddressShortDepthSerializer(data=agent_address)
                 #Deserialize Agent data
                 agent_serializer = self.get_serializer(data=agent_data)
 
@@ -100,14 +101,32 @@ class AgentLogoCreateView(generics.CreateAPIView):
     def post(self, request, format=None):
         data = request.data
         agent_id = data.pop("agent")
-        logo_serializer = self.get_serializer(data=data)
-        if logo_serializer.is_valid():
-            logo_instance = logo_serializer.save()
+
+        try:
+            existing_agent_logo = agnt_models.Agent.objects.get(pk=agent_id[0]).logo
+            if existing_agent_logo:
+                """
+                If Agent has logo already, return a conflict response code and message
+                """
+                return Response(data="Agent has logo already! update it instead.", status=status.HTTP_409_CONFLICT)
             
-            agnt_models.Agent.objects.filter(pk=agent_id[0]).update(logo=logo_instance)
-            return Response(data = logo_serializer.data, status=status.HTTP_201_CREATED)
-        else: 
-            return Response(data="Bad request data", status=status.HTTP_400_BAD_REQUEST)
+            logo_serializer = self.get_serializer(data=data)
+            
+            if logo_serializer.is_valid():
+                """
+                Save the logo
+                """
+                logo_instance = logo_serializer.save()
+
+                """
+                Update the logo of the agent logo field. this is because first the agent was saved without logo uploaded
+                """
+                agnt_models.Agent.objects.filter(pk=agent_id[0]).update(logo=logo_instance)
+                return Response(data = logo_serializer.data, status=status.HTTP_201_CREATED)
+            else: 
+                return Response(data="Bad request data", status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(data="Agent is not found!", status=status.HTTP_404_NOT_FOUND)
 
 
 class AgentLogoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):

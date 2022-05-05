@@ -31,8 +31,8 @@ class AgentLogo(models.Model):
     logo = models.ImageField(verbose_name="agent logo", upload_to=get_agent_logo_file_path)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
-    def __str__(self):
-        return self.uploaded_on
+    # def __str__(self):
+    #     return self.uploaded_on
 
 _UNSAVED_LOGOFIELD = "unsaved_logofield"
 

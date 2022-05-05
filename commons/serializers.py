@@ -23,6 +23,10 @@ class CitySerializer(ModelSerializer):
         model = cmn_models.City
         fields = "__all__"
 
+class AddressShortDepthSerializer(ModelSerializer):
+    class Meta:
+        model = cmn_models.Address
+        fields = "__all__"
 
 class AddressSerializer(ModelSerializer):
     city = CitySerializer()

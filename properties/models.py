@@ -167,11 +167,12 @@ class PropertyPOI(models.Model):
 
 """Apartment"""
 class Apartment(Property):
-    storey = models.IntegerField(verbose_name='apartment storey level', default=0)
+    floors = models.IntegerField(verbose_name='apartment number of floors', default=0)
     is_new = models.BooleanField(verbose_name='is property new?', default=False, blank=True)
+    is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
     
     def __str__(self):
-        return 'Apartment on storey %s' % (self.storey)
+        return 'Apartment on floor %s' % (self.floor)
 
 """An apartment will have at lest one unit"""
 class ApartmentUnit(models.Model):
@@ -179,6 +180,7 @@ class ApartmentUnit(models.Model):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     number_of_baths = models.IntegerField(default=1)
+    floor = models.IntegerField(default=0)
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is apartment unit furnished?', default=False)
     is_available = models.BooleanField(verbose_name='is apartment available?', default=True)
@@ -190,7 +192,7 @@ class ApartmentUnit(models.Model):
 class Condominium(Property):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
-    storey = models.IntegerField(verbose_name='condominium storey level', default=0)
+    floor = models.IntegerField(verbose_name='condominium floor level', default=0)
     num_of_baths = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the condominium furnished?', default=False)
@@ -206,7 +208,7 @@ class Condominium(Property):
 class Villa(Property):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
-    storey = models.IntegerField(verbose_name='How many storey it has', default=0)
+    floor = models.IntegerField(verbose_name='How many floor it has', default=0)
     num_of_baths = models.IntegerField(default=1)
     total_coumpound_area = models.FloatField(default=0.00)
     housing_area = models.FloatField(default=0.00)
@@ -221,7 +223,7 @@ class Villa(Property):
 class TraditionalHome(Property):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
-    storey = models.IntegerField(verbose_name='Home storey level', default=0)
+    floor = models.IntegerField(verbose_name='Home floor level', default=0)
     num_of_baths = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
@@ -243,7 +245,7 @@ class BuildingType(models.Model):
 class Office(Property):
     building_type = models.ForeignKey(BuildingType, related_name='officess',  
         verbose_name='office building type', on_delete=models.SET_NULL, null=True)
-    storey = models.IntegerField(verbose_name='office storey level', default=0)
+    floor = models.IntegerField(verbose_name='office floor level', default=0)
     number_of_rooms = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
@@ -257,7 +259,7 @@ class Office(Property):
 class CommercialProperty(Property):
     building_type = models.ForeignKey(BuildingType, related_name='commercial_properties',  
                     verbose_name='commercial property building type', on_delete=models.SET_NULL, null=True)
-    storey = models.IntegerField(verbose_name='commercial property storey level', default=0)
+    floor = models.IntegerField(verbose_name='commercial property floor level', default=0)
     is_new = models.BooleanField(verbose_name='is the commercial property new?', default=False)
 
 
@@ -276,7 +278,7 @@ class CommercialPropertyUnit(models.Model):
 
 """Hall is a wide room used for meetings and various ceremonies"""
 class Hall(Property):
-    storey = models.IntegerField(verbose_name='Hall storey level', default=0)
+    floor = models.IntegerField(verbose_name='Hall floor level', default=0)
     number_of_seats = models.IntegerField(verbose_name='how many seats it has?', default=5)
     total_capacity = models.IntegerField(verbose_name='total capacity including standing', default=5)
     hall_description = models.TextField(null=False, blank=False)
@@ -303,13 +305,13 @@ class VersatileProperty(Property):
 
 
 class VersatilePropertyUnit(models.Model):
-    storey = models.IntegerField(verbose_name='versatile unit storey level', default=0)
+    floor = models.IntegerField(verbose_name='versatile unit floor level', default=0)
     number_of_rooms = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     vers_prop_unit_description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return '%s storey versatile versatile unit' % (self.storey)
+        return '%s floor versatile versatile unit' % (self.floor)
 
 
 """Every category may have a different listing price set by administrators"""
