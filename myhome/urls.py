@@ -21,10 +21,12 @@ from django.conf.urls.static import static
 from users import urls as user_urls
 from agents import urls as agent_urls
 from commons import urls as cmn_urls
+from properties import urls as prop_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include(user_urls)),
     path('agent/', include(agent_urls)),
     path('common/', include(cmn_urls)),
+    path('property/', include(prop_urls))
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

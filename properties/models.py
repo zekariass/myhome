@@ -115,12 +115,21 @@ class Amenity(models.Model):
     def __str__(self):
         return self.name
 
-
+CATEGORY_KEY = [
+        ('CAT001', 'Apartment'),
+        ('CAT002', 'Condominium'),
+        ('CAT003', 'Traditional House'),
+        ('CAT004', 'Villa'),
+        ('CAT005', 'Commercial Property'),
+        ('CAT006', 'Hall'),
+        ('CAT007', 'Land')
+    ]
 
 """Each property has category"""
 class PropertyCategory(models.Model):
     name = models.CharField(verbose_name='property category name', max_length=50, unique=True, blank=False, null=False)
     description = models.TextField(verbose_name='property category description')
+    cat_key = models.CharField(verbose_name="category key", max_length=20, choices=CATEGORY_KEY, unique=True, default=CATEGORY_KEY[0][0])
     created_on = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
@@ -135,13 +144,13 @@ class Property(models.Model):
     is_residential = models.BooleanField(verbose_name='is property for residence?', default=True)
     description = models.TextField(verbose_name='property description', null=True, blank=True)
     added_on = models.DateTimeField(verbose_name='property added on date', default=timezone.now, editable=False)
-    education_facility = models.ManyToManyField(EducationFacility, related_name='edu_near_by_properties', through='PropertyEduFacility')
-    TransportFacility = models.ManyToManyField(TransportFacility, related_name='tran_near_by_properties', through='PropertyTransFacility')
-    Point_of_interest = models.ManyToManyField(PointOfInterest, related_name='poi_near_by_properties', through='PropertyPOI')
-    amenity = models.ManyToManyField(Amenity, related_name='linked_properties')
+    education_facility = models.ManyToManyField(EducationFacility, related_name='edu_near_by_properties', through='PropertyEduFacility', blank=True)
+    TransportFacility = models.ManyToManyField(TransportFacility, related_name='tran_near_by_properties', through='PropertyTransFacility', blank=True)
+    Point_of_interest = models.ManyToManyField(PointOfInterest, related_name='poi_near_by_properties', through='PropertyPOI', blank=True)
+    amenity = models.ManyToManyField(Amenity, related_name='linked_properties', blank=True)
 
     def __str__(self):
-        return 'Category=%s, Agent=%s, Is_residential=%s' % (self.property_category.name, self.agent.name, self.is_residentials)
+        return 'Category=%s, Agent=%s, Is_residential=%s' % (self.property_category.name, self.agent.name, self.is_residential)
 
 
 """Intermediary table between Property and Education Facility"""
@@ -166,7 +175,8 @@ class PropertyPOI(models.Model):
 
 
 """Apartment"""
-class Apartment(Property):
+class Apartment(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     floors = models.IntegerField(verbose_name='apartment number of floors', default=0)
     is_new = models.BooleanField(verbose_name='is property new?', default=False, blank=True)
     is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
@@ -189,7 +199,8 @@ class ApartmentUnit(models.Model):
         return '%s room and %s bed room apartment' % (self.number_of_rooms, self.number_of_bed_rooms)
 
 """Condominiums are sort of apartments where many residents live in neighbourhood"""
-class Condominium(Property):
+class Condominium(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='condominium floor level', default=0)
@@ -205,7 +216,8 @@ class Condominium(Property):
 """A villa is a large, detached structure with spacious land surrounding it. It is very luxurious and 
     may include amenities such as a pool, stables, and gardens. A villa is generally home to a single-family,
     in contrast to condos and townhomes that are designed to house multiple families. """
-class Villa(Property):
+class Villa(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='How many floor it has', default=0)
@@ -220,7 +232,8 @@ class Villa(Property):
 
 
 """The office is a property that is used for office purposes"""
-class TraditionalHome(Property):
+class TraditionalHouse(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='Home floor level', default=0)
@@ -242,7 +255,8 @@ class BuildingType(models.Model):
         return self.type
 
 """The office is a property that is used for office purposes"""
-class Office(Property):
+class Office(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     building_type = models.ForeignKey(BuildingType, related_name='officess',  
         verbose_name='office building type', on_delete=models.SET_NULL, null=True)
     floor = models.IntegerField(verbose_name='office floor level', default=0)
@@ -256,7 +270,8 @@ class Office(Property):
 
 
 """Commercial property is a property that is used for commercial or trading purposes"""
-class CommercialProperty(Property):
+class CommercialProperty(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     building_type = models.ForeignKey(BuildingType, related_name='commercial_properties',  
                     verbose_name='commercial property building type', on_delete=models.SET_NULL, null=True)
     floor = models.IntegerField(verbose_name='commercial property floor level', default=0)
@@ -277,7 +292,8 @@ class CommercialPropertyUnit(models.Model):
 
 
 """Hall is a wide room used for meetings and various ceremonies"""
-class Hall(Property):
+class Hall(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     floor = models.IntegerField(verbose_name='Hall floor level', default=0)
     number_of_seats = models.IntegerField(verbose_name='how many seats it has?', default=5)
     total_capacity = models.IntegerField(verbose_name='total capacity including standing', default=5)
@@ -287,7 +303,8 @@ class Hall(Property):
         return '%s seats hall' % (self.number_of_seats)
 
 """Land properties for sale. This property type is advertised for sale only"""
-class Land(Property):
+class Land(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     area = models.FloatField(verbose_name='area of the land', default=0.00) 
     length = models.FloatField(verbose_name='length of the land', default=0.00)
     width = models.FloatField(verbose_name='width of the land', default=0.00)
@@ -299,12 +316,14 @@ class Land(Property):
 
 
 """Versatile property is all fit property that can be used for commercial purposes, offices, or even for residence"""
-class VersatileProperty(Property):
+class AllPurposeProperty(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     best_category_for = models.ManyToManyField(PropertyCategory, verbose_name='is is used for?')
     vers_prop_description = models.TextField(blank=True, null=True)
 
 
-class VersatilePropertyUnit(models.Model):
+class AllPurposePropertyUnit(models.Model):
+    all_purpose_property = models.ForeignKey(AllPurposeProperty, on_delete=models.CASCADE, verbose_name="parent all purpose property", related_name="units")
     floor = models.IntegerField(verbose_name='versatile unit floor level', default=0)
     number_of_rooms = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
@@ -393,21 +412,33 @@ def get_property_virtual_file_name(instance, filename):
     return f"properties/virtuals/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
+class PropertyAreaLabel(models.Model):
+    """Specific area name of the property. for example Bedroom, kitchen, corridor, etc.
+        It is useful, for example, to label uploaded images"""
+    label = models.CharField(verbose_name="property area label name", max_length=100, unique=True)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.label
+
+
 """Show up images of a property. A property may have one or more images uploaded"""
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     image = models.ImageField(verbose_name='property image', upload_to=get_property_image_name)
+    label = models.ForeignKey(PropertyAreaLabel, related_name="images", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
+
 
 """video of the property that is uploaded to the system"""
 class PropertyVideo(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
     video = models.FileField(verbose_name='property video', upload_to=get_property_video_name)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
 """A virtual video that shows the surrounding of the property in a 3D environment"""
-class PropertyVirtualVideo(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE)
+class PropertyVirtualTour(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
     virtual_video = models.FileField(verbose_name='property virtual video', upload_to=get_property_virtual_file_name)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
