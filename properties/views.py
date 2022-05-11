@@ -1,7 +1,7 @@
 from rest_framework import generics
 from properties import serializers as prop_serializers
 from properties import models as prop_models
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
@@ -66,6 +66,8 @@ class PropertyListCreateView(generics.ListCreateAPIView):
                     hall = request.data.pop("hall")
                 elif prop_cat_key == "CAT007":
                     land = request.data.pop("land")
+                elif prop_cat_key == "CAT008":
+                    land = request.data.pop("all_purpose_property")
 
                 property_serializer = prop_serializers.PropertyCreateBasicSerializer(data=request.data)
 
@@ -98,9 +100,9 @@ class PropertyListCreateView(generics.ListCreateAPIView):
                             print("Bad apartment data!")
                             return Response(data="Bad apartment data!", status=status.HTTP_400_BAD_REQUEST)
 
-                    return Response(None)
+                    elif condominium is not None:
+                        pass
 
-                    
                 else: 
                     print("Bad property data!")
                     return Response(data="Bad property data!", status=status.HTTP_400_BAD_REQUEST)
@@ -110,3 +112,18 @@ class PropertyListCreateView(generics.ListCreateAPIView):
         else:
             print("Property address not valid!")
             return Response(data="Bad address data!", status=status.HTTP_400_BAD_REQUEST)
+
+
+
+#================================================================================
+
+class HouseTypeListCreateView(generics.ListCreateAPIView):
+    queryset = prop_models.HouseType.objects.all()
+    serializer_class = prop_serializers.HouseTypeSerializer
+    permission_classes = [AllowAny,]
+
+
+class BuildingTypeListCreateView(generics.ListCreateAPIView):
+    queryset = prop_models.BuildingType.objects.all()
+    serializer_class = prop_serializers.HouseTypeSerializer
+    permission_classes = [AllowAny,]

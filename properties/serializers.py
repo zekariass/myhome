@@ -43,3 +43,15 @@ class ApartmentUnitCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.ApartmentUnit
         exclude = ("apartment",)
+
+
+class HouseTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.HouseType
+        fields = "__all__"
+
+
+class BuildingTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.BuildingType
+        fields = "__all__"

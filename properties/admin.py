@@ -35,3 +35,6 @@ admin.site.register(prop_models.PropertyVideo)
 admin.site.register(prop_models.PropertyVirtualTour)
 admin.site.register(prop_models.PropertyUniqueFeature)
 admin.site.register(prop_models.Rule)
+admin.site.register(prop_models.HouseType)
+admin.site.register(prop_models.ShareHouse)
+

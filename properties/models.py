@@ -120,9 +120,12 @@ CATEGORY_KEY = [
         ('CAT002', 'Condominium'),
         ('CAT003', 'Traditional House'),
         ('CAT004', 'Villa'),
-        ('CAT005', 'Commercial Property'),
-        ('CAT006', 'Hall'),
-        ('CAT007', 'Land')
+        ('CAT005', 'Share House'),
+        ('CAT006', 'Commercial Property'),
+        ('CAT007', 'Office'),
+        ('CAT008', 'Hall'),
+        ('CAT009', 'Land'),
+        ('CAT010', 'All Purpose Property'),
     ]
 
 """Each property has category"""
@@ -204,7 +207,7 @@ class Condominium(models.Model):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='condominium floor level', default=0)
-    num_of_baths = models.IntegerField(default=1)
+    number_of_baths = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the condominium furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the condominium new?', default=False)
@@ -221,7 +224,7 @@ class Villa(models.Model):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='How many floor it has', default=0)
-    num_of_baths = models.IntegerField(default=1)
+    number_of_baths = models.IntegerField(default=1)
     total_coumpound_area = models.FloatField(default=0.00)
     housing_area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the villa furnished?', default=False)
@@ -237,7 +240,7 @@ class TraditionalHouse(models.Model):
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='Home floor level', default=0)
-    num_of_baths = models.IntegerField(default=1)
+    number_of_baths = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the home new?', default=False)
@@ -245,6 +248,29 @@ class TraditionalHouse(models.Model):
     def __str__(self):
         return '%s rooms and %s bed room traditional home' % (self.number_of_rooms, self.number_of_bed_rooms)
 
+"""House type, such as Apartment, Condominium, Traditional House, etc"""
+class HouseType(models.Model):
+    type = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.type
+
+"""Share House is a house that someone may share it with someone else"""
+class ShareHouse(models.Model):
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    house_type = models.ForeignKey(HouseType, related_name='share_houses',  
+        verbose_name='share house type', on_delete=models.SET_NULL, null=True)
+    total_number_of_rooms = models.IntegerField(default=1)
+    number_of_rooms_to_share = models.IntegerField(default=1)
+    total_number_of_bed_rooms = models.IntegerField(default=1)
+    number_of_bed_rooms_to_share = models.IntegerField(default=1)
+    total_number_of_baths = models.IntegerField(default=1)
+    number_of_baths_to_share = models.IntegerField(default=1)
+    floor = models.IntegerField(verbose_name='Home floor level', default=0)
+    area = models.FloatField(default=0.00)
+    is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
+    is_new = models.BooleanField(verbose_name='is the home new?', default=False)
 
 """Building type is the type of building that the office or commercial property is part of"""
 class BuildingType(models.Model):
@@ -264,6 +290,8 @@ class Office(models.Model):
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the office new?', default=False)
+    has_parking_space = models.BooleanField(verbose_name='Does property has parking space?', default=False)
+
 
     def __str__(self):
         return '%s rooms office' % (self.number_of_rooms)
@@ -274,8 +302,10 @@ class CommercialProperty(models.Model):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
     building_type = models.ForeignKey(BuildingType, related_name='commercial_properties',  
                     verbose_name='commercial property building type', on_delete=models.SET_NULL, null=True)
-    floor = models.IntegerField(verbose_name='commercial property floor level', default=0)
-    is_new = models.BooleanField(verbose_name='is the commercial property new?', default=False)
+    floors = models.IntegerField(verbose_name='commercial property floor level', default=0)
+    is_new = models.BooleanField(verbose_name='Does property has parking space?', default=False)
+    has_parking_space = models.BooleanField(verbose_name='is the commercial property new?', default=False)
+    is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
 
 
 """Commercial properties may have multiple units. Units are a part of the property to be rented or sold on their own. 
@@ -285,7 +315,8 @@ class CommercialPropertyUnit(models.Model):
                 related_name='single_commercial_units', verbose_name='parent commecrial property')
     number_of_rooms = models.IntegerField(default=1)
     area = models.FloatField(verbose_name='total area of the unit', default=0.00)
-    com_prop_unit_description = models.TextField()
+    floor = models.IntegerField(default=0)
+    com_prop_unit_description = models.TextField(null=False, blank=False)
 
     def __str__(self):
         return '%s rooms commercial property' % (self.number_of_rooms)
@@ -297,6 +328,8 @@ class Hall(models.Model):
     floor = models.IntegerField(verbose_name='Hall floor level', default=0)
     number_of_seats = models.IntegerField(verbose_name='how many seats it has?', default=5)
     total_capacity = models.IntegerField(verbose_name='total capacity including standing', default=5)
+    has_parking_space = models.BooleanField(verbose_name='Does the property has parking space?', default=False)
+    number_of_parking_spaces = models.IntegerField(verbose_name='how many parking spaces the property has?', default=5)
     hall_description = models.TextField(null=False, blank=False)
 
     def __str__(self):
@@ -318,16 +351,21 @@ class Land(models.Model):
 """Versatile property is all fit property that can be used for commercial purposes, offices, or even for residence"""
 class AllPurposeProperty(models.Model):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
-    best_category_for = models.ManyToManyField(PropertyCategory, verbose_name='is is used for?')
-    vers_prop_description = models.TextField(blank=True, null=True)
+    building_type = models.ForeignKey(BuildingType, related_name='all_purpose_properties',  
+                    verbose_name='all purpose property building type', on_delete=models.SET_NULL, null=True)
+    floors = models.IntegerField(verbose_name='all purpose property floor level', default=0)
+    best_for = models.TextField(blank=True, null=True, verbose_name="best for use")
+    all_purpose_property_description = models.TextField(blank=True, null=True)
+    has_parking_space = models.BooleanField(verbose_name='Does the property has parking space?', default=False)
+    is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
 
 
 class AllPurposePropertyUnit(models.Model):
     all_purpose_property = models.ForeignKey(AllPurposeProperty, on_delete=models.CASCADE, verbose_name="parent all purpose property", related_name="units")
-    floor = models.IntegerField(verbose_name='versatile unit floor level', default=0)
+    floor = models.IntegerField(verbose_name='all purpose property unit floor level', default=0)
     number_of_rooms = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
-    vers_prop_unit_description = models.TextField(blank=True, null=True)
+    all_purpose_property_unit_description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return '%s floor versatile versatile unit' % (self.floor)
@@ -412,7 +450,7 @@ def get_property_virtual_file_name(instance, filename):
     return f"properties/virtuals/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
-class PropertyAreaLabel(models.Model):
+class PropertyMediaLabel(models.Model):
     """Specific area name of the property. for example Bedroom, kitchen, corridor, etc.
         It is useful, for example, to label uploaded images"""
     label = models.CharField(verbose_name="property area label name", max_length=100, unique=True)
@@ -426,7 +464,7 @@ class PropertyAreaLabel(models.Model):
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     image = models.ImageField(verbose_name='property image', upload_to=get_property_image_name)
-    label = models.ForeignKey(PropertyAreaLabel, related_name="images", on_delete=models.SET_NULL, null=True, blank=True)
+    label = models.ForeignKey(PropertyMediaLabel, related_name="images", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
 

@@ -31,7 +31,7 @@ class AgentCreateView(generics.CreateAPIView):
                
                 agent_address = request.data.pop('address')
                 agent_data = request.data
-                print("agent_address: ",agent_address, "agent_data", agent_data)
+                # print("agent_address: ",agent_address, "agent_data", agent_data)
 
                 # Get agent and address objects from DB
                 country = cmn_models.Country.objects.get(pk=agent_address['country'])

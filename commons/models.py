@@ -45,7 +45,7 @@ class Address(models.Model):
     post_code = models.CharField(max_length=20, blank=True, null=True)
     building_name_or_number = models.CharField(verbose_name='building name or number', max_length=50, blank=True, null=True)
     room_number = models.CharField(max_length=20, blank=True, null=True)
-    latitute = models.CharField(verbose_name='geo latitued', max_length=20, null=True, blank=True)
+    latitude = models.CharField(verbose_name='geo latitude', max_length=20, null=True, blank=True)
     longitude = models.CharField(verbose_name='geo longitude', max_length=20, null=True, blank=True)
 
     def __str__(self):
