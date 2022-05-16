@@ -23,7 +23,7 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated,]
 
     def post(self, request, format=None):
-        # print(request.data)
+        print(request.data)
         property_address = request.data.pop("address")
 
         property_address_serializer = cmn_serializers.AddressShortDepthSerializer(data=property_address)
