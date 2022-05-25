@@ -433,14 +433,14 @@ def get_property_image_name(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"properties/images/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"properties/images/{instance.property.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 def get_property_video_name(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"properties/videos/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"properties/videos/{instance.property.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
 def get_property_virtual_file_name(instance, filename):
@@ -450,7 +450,7 @@ def get_property_virtual_file_name(instance, filename):
     return f"properties/virtuals/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 
-class PropertyMediaLabel(models.Model):
+class PropertyFileLabel(models.Model):
     """Specific area name of the property. for example Bedroom, kitchen, corridor, etc.
         It is useful, for example, to label uploaded images"""
     label = models.CharField(verbose_name="property area label name", max_length=100, unique=True)
@@ -464,7 +464,7 @@ class PropertyMediaLabel(models.Model):
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     image = models.ImageField(verbose_name='property image', upload_to=get_property_image_name)
-    label = models.ForeignKey(PropertyMediaLabel, related_name="images", on_delete=models.SET_NULL, null=True, blank=True)
+    label = models.ForeignKey(PropertyFileLabel, related_name="images", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
 
@@ -472,12 +472,15 @@ class PropertyImage(models.Model):
 class PropertyVideo(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     video = models.FileField(verbose_name='property video', upload_to=get_property_video_name)
+    type = models.CharField(verbose_name='video type', max_length=50, blank=True, null=True)
+    # label = models.ForeignKey(PropertyFileLabel, related_name="videos", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
 """A virtual video that shows the surrounding of the property in a 3D environment"""
 class PropertyVirtualTour(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     virtual_video = models.FileField(verbose_name='property virtual video', upload_to=get_property_virtual_file_name)
+    # label = models.ForeignKey(PropertyFileLabel, related_name="virtual_images", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
 
