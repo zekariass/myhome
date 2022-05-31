@@ -20,7 +20,7 @@ class PropertyCategoryListCreateView(generics.ListCreateAPIView):
 
 class PropertyListCreateView(generics.ListCreateAPIView):
     queryset = prop_models.PropertyCategory.objects.all()
-    serializer_class = prop_serializers.PropertyCategorySerializer
+    serializer_class = prop_serializers.PropertySerializer
     permission_classes = [IsAuthenticated,]
 
     def post(self, request, format=None):
@@ -146,7 +146,30 @@ class PropertyListCreateView(generics.ListCreateAPIView):
             return Response(data="Bad address data!", status=status.HTTP_400_BAD_REQUEST)
 
 
+class PropertyListByAgentView(generics.ListAPIView):
+    # queryset = prop_models.PropertyCategory.objects.all()
+    serializer_class = prop_serializers.PropertySerializer
+    permission_classes = [IsAuthenticated,]
 
+    def get_queryset(self):
+        user = self.request.user
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+        except ObjectDoesNotExist:
+            return None
+        
+        properties = prop_models.Property.objects.filter(agent=currentAgentAdmin.agent)
+        return properties
+
+class PropertyRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
+    queryset = prop_models.Property.objects.all()
+    serializer_class = prop_serializers.PropertySerializer
+    permission_classes = [IsAuthenticated,]
+
+class PropertyUpdateAPIView(generics.UpdateAPIView):
+    queryset = prop_models.Property.objects.all()
+    serializer_class = prop_serializers.PropertyCreateBasicSerializer
+    permission_classes = [IsAuthenticated,]
 #================================================================================
 
 class HouseTypeListCreateView(generics.ListCreateAPIView):
@@ -240,3 +263,40 @@ class PropertyFileLabelListCreateView(generics.ListCreateAPIView):
     queryset = prop_models.PropertyFileLabel.objects.all()
     serializer_class = prop_serializers.PropertyFileLabelSerializer
     permission_classes = [AllowAny,]
+
+#=====================================================================================================================
+class EduFaLevelListView(generics.ListAPIView):
+    queryset = prop_models.EdufaLevel.objects.all()
+    serializer_class = prop_serializers.EdufaLevelSerializer
+    permission_classes = [AllowAny,]
+
+class EducationFacilityListCreateView(generics.ListCreateAPIView):
+    queryset = prop_models.EducationFacility.objects.all()
+    serializer_class = prop_serializers.EducationFacilityBasicCreateSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def post(self, request, **kwargs):
+
+        propertyId = request.data.pop("property")
+        # print(request.data)
+
+        try:
+            property_instance = prop_models.Property.objects.get(pk=propertyId)
+        except ObjectDoesNotExist:
+            return Response(data="Property is not found!", status=status.HTTP_404_NOT_FOUND)
+
+        edufa_serializer = self.get_serializer(data=request.data)
+
+        if edufa_serializer.is_valid():
+            edufa_instance = edufa_serializer.save()
+
+            if edufa_instance:
+                prop_models.PropertyEduFacility.objects.create(education_facility=edufa_instance, property=property_instance)
+                return Response(data=edufa_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Wrong when saving education facility!")
+                return Response(data="Wrong when saving education facility!", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            print("Bad Edufa data!")
+            return Response(data="Bad Edufa data!", status=status.HTTP_400_BAD_REQUEST)

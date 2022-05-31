@@ -47,6 +47,7 @@ class SystemAssetOwner(models.Model):
     some functionality with it during the listing, such as promotional parameters"""
 class ListingParameter(models.Model):
     param_name = models.CharField(verbose_name="listing parameter name", unique=True, blank=False, null=False, max_length=100)
+    param_value = models.CharField(verbose_name="Listing parameter value", max_length=100, default="")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -57,6 +58,7 @@ class ListingParameter(models.Model):
     use to function well, such as folder names, password length, password expiry age, etc"""
 class SystemParameter(models.Model):
     param_name = models.CharField(verbose_name="system parameter name", unique=True, blank=False, null=False, max_length=100)
+    param_value = models.CharField(verbose_name="system parameter value", max_length=100, default="")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):

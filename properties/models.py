@@ -148,12 +148,12 @@ class Property(models.Model):
     description = models.TextField(verbose_name='property description', null=True, blank=True)
     added_on = models.DateTimeField(verbose_name='property added on date', default=timezone.now, editable=False)
     education_facility = models.ManyToManyField(EducationFacility, related_name='edu_near_by_properties', through='PropertyEduFacility', blank=True)
-    TransportFacility = models.ManyToManyField(TransportFacility, related_name='tran_near_by_properties', through='PropertyTransFacility', blank=True)
-    Point_of_interest = models.ManyToManyField(PointOfInterest, related_name='poi_near_by_properties', through='PropertyPOI', blank=True)
-    amenity = models.ManyToManyField(Amenity, related_name='linked_properties', blank=True)
+    transport_facility = models.ManyToManyField(TransportFacility, related_name='tran_near_by_properties', through='PropertyTransFacility', blank=True)
+    point_of_interest = models.ManyToManyField(PointOfInterest, related_name='poi_near_by_properties', through='PropertyPOI', blank=True)
+    amenity = models.ManyToManyField(Amenity, related_name='linked_properties', through='PropertyAmenity', blank=True)
 
     def __str__(self):
-        return 'Category=%s, Agent=%s, Is_residential=%s' % (self.property_category.name, self.agent.name, self.is_residential)
+        return '%d %s' % (self.pk, self.property_category.name)
 
 
 """Intermediary table between Property and Education Facility"""
@@ -176,6 +176,12 @@ class PropertyPOI(models.Model):
     point_of_interest = models.ForeignKey(PointOfInterest, on_delete=models.CASCADE)
     added_on = models.DateTimeField(default=timezone.now, editable=False)
 
+
+"""Intermediary table between Property and Amenity"""
+class PropertyAmenity(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
+    added_on = models.DateTimeField(default=timezone.now, editable=False)
 
 """Apartment"""
 class Apartment(models.Model):
@@ -462,7 +468,7 @@ class PropertyFileLabel(models.Model):
 
 """Show up images of a property. A property may have one or more images uploaded"""
 class PropertyImage(models.Model):
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(verbose_name='property image', upload_to=get_property_image_name)
     label = models.ForeignKey(PropertyFileLabel, related_name="images", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
@@ -470,7 +476,7 @@ class PropertyImage(models.Model):
 
 """video of the property that is uploaded to the system"""
 class PropertyVideo(models.Model):
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="videos")
     video = models.FileField(verbose_name='property video', upload_to=get_property_video_name)
     type = models.CharField(verbose_name='video type', max_length=50, blank=True, null=True)
     # label = models.ForeignKey(PropertyFileLabel, related_name="videos", on_delete=models.SET_NULL, null=True, blank=True)
@@ -478,8 +484,8 @@ class PropertyVideo(models.Model):
 
 """A virtual video that shows the surrounding of the property in a 3D environment"""
 class PropertyVirtualTour(models.Model):
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
-    virtual_video = models.FileField(verbose_name='property virtual video', upload_to=get_property_virtual_file_name)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="virtual_tours")
+    virtual_image = models.FileField(verbose_name='property virtual video', upload_to=get_property_virtual_file_name)
     # label = models.ForeignKey(PropertyFileLabel, related_name="virtual_images", on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_on = models.DateTimeField(default=timezone.now, editable=False)
 
