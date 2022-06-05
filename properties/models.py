@@ -23,7 +23,7 @@ DISTANCE_UNIT = [
 """Point of interest is special places or facilities near to a property, such as airports, parks, cinemas, etc"""
 class PointOfInterest(models.Model):
     poi_category = models.ForeignKey(POICategory, on_delete=models.SET_NULL, null=True, verbose_name='point of interest category')
-    name = models.CharField(verbose_name='point of interest name', max_length=100, unique=True, blank=False, null=False)
+    name = models.CharField(verbose_name='point of interest name', max_length=100, blank=False, null=False)
     description = models.TextField(blank=True, null=True)
     distance_from_property = models.FloatField(default=0.00)
     distance_unit = models.CharField(choices=DISTANCE_UNIT, max_length=20, default=DISTANCE_UNIT[1][0])
@@ -133,10 +133,22 @@ class PropertyCategory(models.Model):
     name = models.CharField(verbose_name='property category name', max_length=50, unique=True, blank=False, null=False)
     description = models.TextField(verbose_name='property category description')
     cat_key = models.CharField(verbose_name="category key", max_length=20, choices=CATEGORY_KEY, unique=True, default=CATEGORY_KEY[0][0])
+    amenities = models.ManyToManyField(Amenity, related_name="property_categories", through="PropertyCategoryAmenity", blank=True)
     created_on = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
         return self.name
+
+"""Property Category and Amenity intermediate table"""
+class PropertyCategoryAmenity(models.Model):
+    property_category = models.ForeignKey(PropertyCategory, on_delete=models.CASCADE)
+    amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
+    added_on = models.DateTimeField(default=timezone.now, editable=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["property_category","amenity"], name="prop_cat_amenity_unique_constraint")
+        ]
 
 
 """Property is parent class of all property categories"""
@@ -147,9 +159,9 @@ class Property(models.Model):
     is_residential = models.BooleanField(verbose_name='is property for residence?', default=True)
     description = models.TextField(verbose_name='property description', null=True, blank=True)
     added_on = models.DateTimeField(verbose_name='property added on date', default=timezone.now, editable=False)
-    education_facility = models.ManyToManyField(EducationFacility, related_name='edu_near_by_properties', through='PropertyEduFacility', blank=True)
-    transport_facility = models.ManyToManyField(TransportFacility, related_name='tran_near_by_properties', through='PropertyTransFacility', blank=True)
-    point_of_interest = models.ManyToManyField(PointOfInterest, related_name='poi_near_by_properties', through='PropertyPOI', blank=True)
+    education_facility = models.ManyToManyField(EducationFacility, related_name='near_by_properties', through='PropertyEduFacility', blank=True)
+    transport_facility = models.ManyToManyField(TransportFacility, related_name='near_by_properties', through='PropertyTransFacility', blank=True)
+    point_of_interest = models.ManyToManyField(PointOfInterest, related_name='near_by_properties', through='PropertyPOI', blank=True)
     amenity = models.ManyToManyField(Amenity, related_name='linked_properties', through='PropertyAmenity', blank=True)
 
     def __str__(self):
@@ -161,6 +173,8 @@ class PropertyEduFacility(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     education_facility = models.ForeignKey(EducationFacility, on_delete=models.CASCADE)
     added_on = models.DateTimeField(default=timezone.now, editable=False)
+
+
 
 
 """Intermediary table between Property and Transport Facility"""
@@ -183,12 +197,26 @@ class PropertyAmenity(models.Model):
     amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
     added_on = models.DateTimeField(default=timezone.now, editable=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["property","amenity"], name="property_amenity_unique_constraint")
+        ]
+
 """Apartment"""
 class Apartment(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="apartment")
     floors = models.IntegerField(verbose_name='apartment number of floors', default=0)
     is_new = models.BooleanField(verbose_name='is property new?', default=False, blank=True)
     is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
+    agent = models.BigIntegerField(verbose_name='agent who creates the apartment', null=True, blank=True)
+
+    # @property
+    # def property_agent(self):
+    #     return self._property.agent
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(Apartment, self).save(*args, **kwargs)
     
     def __str__(self):
         return 'Apartment on floor %s' % (self.floor)
@@ -209,7 +237,7 @@ class ApartmentUnit(models.Model):
 
 """Condominiums are sort of apartments where many residents live in neighbourhood"""
 class Condominium(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="condominium")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='condominium floor level', default=0)
@@ -226,7 +254,7 @@ class Condominium(models.Model):
     may include amenities such as a pool, stables, and gardens. A villa is generally home to a single-family,
     in contrast to condos and townhomes that are designed to house multiple families. """
 class Villa(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="villa")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='How many floor it has', default=0)
@@ -242,7 +270,7 @@ class Villa(models.Model):
 
 """The office is a property that is used for office purposes"""
 class TraditionalHouse(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="traditional_house")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='Home floor level', default=0)
@@ -264,7 +292,7 @@ class HouseType(models.Model):
 
 """Share House is a house that someone may share it with someone else"""
 class ShareHouse(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="share_house")
     house_type = models.ForeignKey(HouseType, related_name='share_houses',  
         verbose_name='share house type', on_delete=models.SET_NULL, null=True)
     total_number_of_rooms = models.IntegerField(default=1)
@@ -288,7 +316,7 @@ class BuildingType(models.Model):
 
 """The office is a property that is used for office purposes"""
 class Office(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="office")
     building_type = models.ForeignKey(BuildingType, related_name='officess',  
         verbose_name='office building type', on_delete=models.SET_NULL, null=True)
     floor = models.IntegerField(verbose_name='office floor level', default=0)
@@ -305,7 +333,7 @@ class Office(models.Model):
 
 """Commercial property is a property that is used for commercial or trading purposes"""
 class CommercialProperty(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="commercial_property")
     building_type = models.ForeignKey(BuildingType, related_name='commercial_properties',  
                     verbose_name='commercial property building type', on_delete=models.SET_NULL, null=True)
     floors = models.IntegerField(verbose_name='commercial property floor level', default=0)
@@ -330,7 +358,7 @@ class CommercialPropertyUnit(models.Model):
 
 """Hall is a wide room used for meetings and various ceremonies"""
 class Hall(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="hall")
     floor = models.IntegerField(verbose_name='Hall floor level', default=0)
     number_of_seats = models.IntegerField(verbose_name='how many seats it has?', default=5)
     total_capacity = models.IntegerField(verbose_name='total capacity including standing', default=5)
@@ -343,7 +371,7 @@ class Hall(models.Model):
 
 """Land properties for sale. This property type is advertised for sale only"""
 class Land(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="land")
     area = models.FloatField(verbose_name='area of the land', default=0.00) 
     length = models.FloatField(verbose_name='length of the land', default=0.00)
     width = models.FloatField(verbose_name='width of the land', default=0.00)
@@ -356,7 +384,7 @@ class Land(models.Model):
 
 """Versatile property is all fit property that can be used for commercial purposes, offices, or even for residence"""
 class AllPurposeProperty(models.Model):
-    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property")
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="all_purpose_property")
     building_type = models.ForeignKey(BuildingType, related_name='all_purpose_properties',  
                     verbose_name='all purpose property building type', on_delete=models.SET_NULL, null=True)
     floors = models.IntegerField(verbose_name='all purpose property floor level', default=0)
@@ -406,7 +434,7 @@ class ListingDiscountByCategory(models.Model):
 
     @property
     def is_expired(self):
-        expired = self.expired_on >= timezone.now
+        expired = self.expired_on <= timezone.now()
         return expired
 
     def __str__(self):
@@ -509,7 +537,7 @@ class Rule(models.Model):
         ('VERY_HIGH', 'Very High')
     ]
 
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="rules")
     title = models.CharField(verbose_name='rule title', max_length=100, blank=False, null=False)
     description = models.TextField(null=True, blank=True)
     strictness = models.CharField(verbose_name='how strict is the rule?', max_length=100, choices=STRICTNESS, default=STRICTNESS[1][0])
