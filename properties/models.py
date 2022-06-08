@@ -245,6 +245,12 @@ class Condominium(models.Model):
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the condominium furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the condominium new?', default=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the condominium', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(Condominium, self).save(*args, **kwargs)
+
 
     def __str__(self):
         return '%s room and %s bed room condominium' % (self.number_of_rooms, self.number_of_bed_rooms)
@@ -259,11 +265,16 @@ class Villa(models.Model):
     number_of_bed_rooms = models.IntegerField(default=1)
     floor = models.IntegerField(verbose_name='How many floor it has', default=0)
     number_of_baths = models.IntegerField(default=1)
-    total_coumpound_area = models.FloatField(default=0.00)
+    total_compound_area = models.FloatField(default=0.00)
     housing_area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the villa furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the villa new?', default=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the villa', null=True, blank=True)
     
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(Villa, self).save(*args, **kwargs)
+
     def __str__(self):
         return '%s room and %s bed room villa' % (self.number_of_rooms, self.number_of_bed_rooms)
 
@@ -278,6 +289,11 @@ class TraditionalHouse(models.Model):
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the home new?', default=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the traditionalhouse', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(TraditionalHouse, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s rooms and %s bed room traditional home' % (self.number_of_rooms, self.number_of_bed_rooms)
@@ -305,6 +321,11 @@ class ShareHouse(models.Model):
     area = models.FloatField(default=0.00)
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the home new?', default=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the sharehouse', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(ShareHouse, self).save(*args, **kwargs)
 
 """Building type is the type of building that the office or commercial property is part of"""
 class BuildingType(models.Model):
@@ -325,7 +346,12 @@ class Office(models.Model):
     is_furnished = models.BooleanField(verbose_name='is the home furnished?', default=False)
     is_new = models.BooleanField(verbose_name='is the office new?', default=False)
     has_parking_space = models.BooleanField(verbose_name='Does property has parking space?', default=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the office', null=True, blank=True)
 
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(Office, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s rooms office' % (self.number_of_rooms)
@@ -340,7 +366,11 @@ class CommercialProperty(models.Model):
     is_new = models.BooleanField(verbose_name='Does property has parking space?', default=False)
     has_parking_space = models.BooleanField(verbose_name='is the commercial property new?', default=False)
     is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
+    agent = models.BigIntegerField(verbose_name='agent who creates the commercial property', null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(CommercialProperty, self).save(*args, **kwargs)
 
 """Commercial properties may have multiple units. Units are a part of the property to be rented or sold on their own. 
     For instance, a commercial centre may be registered as one commercial property and it then has different units"""
@@ -365,6 +395,11 @@ class Hall(models.Model):
     has_parking_space = models.BooleanField(verbose_name='Does the property has parking space?', default=False)
     number_of_parking_spaces = models.IntegerField(verbose_name='how many parking spaces the property has?', default=5)
     hall_description = models.TextField(null=False, blank=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the hall', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(Hall, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s seats hall' % (self.number_of_seats)
@@ -377,6 +412,11 @@ class Land(models.Model):
     width = models.FloatField(verbose_name='width of the land', default=0.00)
     has_plan = models.BooleanField(verbose_name='the land has plan?', default=True)
     has_debt = models.BooleanField(verbose_name='the land has unpaid debt?', default=False)
+    agent = models.BigIntegerField(verbose_name='agent who creates the land', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(Land, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s area land' % (self.area)
@@ -392,7 +432,11 @@ class AllPurposeProperty(models.Model):
     all_purpose_property_description = models.TextField(blank=True, null=True)
     has_parking_space = models.BooleanField(verbose_name='Does the property has parking space?', default=False)
     is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
+    agent = models.BigIntegerField(verbose_name='agent who creates the all purpose property', null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(AllPurposeProperty, self).save(*args, **kwargs)
 
 class AllPurposePropertyUnit(models.Model):
     all_purpose_property = models.ForeignKey(AllPurposeProperty, on_delete=models.CASCADE, verbose_name="parent all purpose property", related_name="units")

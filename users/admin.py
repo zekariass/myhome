@@ -56,7 +56,7 @@ class MyHomeUserAdmin(BaseUserAdmin):
     list_filter = ('is_admin',)
     fieldsets = ((None, {'fields': ('email', 'password',)}),
                 ('Personal info', {'fields': ('first_name', 'last_name', 'user_group', 'is_active', 'is_blocked')}),
-                ('Permissions', {'fields': ('is_admin',)}))
+                ('Permissions', {'fields': ('is_admin',"is_staff")}))
 
     add_fieldsets = (
                     (None, {'classes': ('wide',),

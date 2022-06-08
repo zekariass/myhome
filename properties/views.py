@@ -178,6 +178,281 @@ class PropertyUpdateAPIView(generics.UpdateAPIView):
     queryset = prop_models.Property.objects.all()
     serializer_class = prop_serializers.PropertyCreateBasicSerializer
     permission_classes = [IsAuthenticated,]
+
+#=============== LAND =============================================================
+class LandRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.Land.objects.all()
+    serializer_class = prop_serializers.LandSerializer
+    permission_classes = [IsAuthenticated,]
+
+
+#=============== SHARE HOUSE=======================================================
+class ShareHouseListByAgentView(generics.ListAPIView):
+    serializer_class = prop_serializers.ShareHouseSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return None
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+        except ObjectDoesNotExist:
+            return None
+        
+        share_house = prop_models.ShareHouse.objects.filter(agent=currentAgentAdmin.agent.id)
+
+        return share_house
+
+
+class ShareHouseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.ShareHouse.objects.all()
+    serializer_class = prop_serializers.ShareHouseSerializer
+    permission_classes = [IsAuthenticated,]
+
+#============= APARTMENT =======================================================
+class ApartmentListByAgentView(generics.ListAPIView):
+    # queryset = prop_models.PropertyCategory.objects.all()
+    serializer_class = prop_serializers.ApartmentSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return None
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+            # print(currentAgentAdmin.agent.id)
+        except ObjectDoesNotExist:
+            return None
+        
+        apartments = prop_models.Apartment.objects.filter(agent=currentAgentAdmin.agent.id)
+
+        return apartments
+
+class ApartmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.Apartment.objects.all()
+    serializer_class = prop_serializers.ApartmentSerializer
+    permission_classes = [IsAuthenticated,]
+
+
+class ApartmentUnitByApartmentView(generics.ListAPIView):
+    queryset = prop_models.ApartmentUnit.objects.all()
+    serializer_class = prop_serializers.ApartmentUnitSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request, **kwargs):
+        apartmentId = request.query_params.get("apartment")
+
+        apartment_units = prop_models.ApartmentUnit.objects.filter(apartment=apartmentId)
+
+        if apartment_units.exists():
+            apartment_unit_serializer = self.get_serializer(apartment_units, many=True)
+        
+        else:
+            return Response(data="Apartment unit does not exist for this apartment!", status=status.HTTP_404_NOT_FOUND)
+
+        return Response(data=apartment_unit_serializer.data, status=status.HTTP_200_OK)
+
+
+class ApartmentUnitCreateView(generics.CreateAPIView):
+    queryset = prop_models.ApartmentUnit.objects.all()
+    serializer_class = prop_serializers.ApartmentUnitCreateBasicSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def post(self, request, **kwargs):
+
+        apartment_id = request.data.get("apartment")
+        apartment_unit = request.data.get("unit")
+
+        try:
+            apartment_instance = prop_models.Apartment.objects.get(pk=apartment_id)
+
+        except ObjectDoesNotExist:
+            print(f"Apartment {apartment_id} is not found!")
+            return Response(data=f"Apartment {apartment_id} is not found!", status=status.HTTP_404_NOT_FOUND)
+
+        apartment_unit_serializer = self.get_serializer(data=apartment_unit)
+
+        if apartment_unit_serializer.is_valid():
+            try:
+                apartment_unit_serializer.save(apartment=apartment_instance)
+                return Response(data=apartment_unit_serializer.data, status=status.HTTP_201_CREATED)
+            except ObjectDoesNotExist:
+                print("Something went wrong when saving apartment unit!")
+                return Response(data="Something went wrong when saving apartment unit!", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+        else:
+            print("Apartment unit data is not valid!")
+            return Response(data="Apartment unit data is not valid!", status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ApartmentUnitRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.ApartmentUnit.objects.all()
+    serializer_class = prop_serializers.ApartmentUnitSerializer
+    permission_classes = [IsAuthenticated,]
+
+
+#============= VILLA ============================================================
+class VillaListByAgentView(generics.ListAPIView):
+    # queryset = prop_models.PropertyCategory.objects.all()
+    serializer_class = prop_serializers.VillaSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return None
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+            # print(currentAgentAdmin.agent.id)
+        except ObjectDoesNotExist:
+            return None
+        
+        villas = prop_models.Villa.objects.filter(agent=currentAgentAdmin.agent.id)
+
+        return villas
+
+class VillaRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.Villa.objects.all()
+    serializer_class = prop_serializers.VillaSerializer
+    permission_classes = [IsAuthenticated,]
+
+
+#============= CONDOMINIUM ========================================================
+class CondominiumListByAgentView(generics.ListAPIView):
+    # queryset = prop_models.PropertyCategory.objects.all()
+    serializer_class = prop_serializers.CondominiumSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return None
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+            # print(currentAgentAdmin.agent.id)
+        except ObjectDoesNotExist:
+            return None
+        
+        condominiums = prop_models.Condominium.objects.filter(agent=currentAgentAdmin.agent.id)
+
+        return condominiums
+
+class CondominiumRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.Condominium.objects.all()
+    serializer_class = prop_serializers.CondominiumSerializer
+    permission_classes = [IsAuthenticated,]
+
+
+#============= TRADITIONAL HOUSE ===================================================
+class TraditionalHouseListByAgentView(generics.ListAPIView):
+    # queryset = prop_models.PropertyCategory.objects.all()
+    serializer_class = prop_serializers.TraditionalHouseSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return None
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+            # print(currentAgentAdmin.agent.id)
+        except ObjectDoesNotExist:
+            return None
+        
+        traditional_house = prop_models.TraditionalHouse.objects.filter(agent=currentAgentAdmin.agent.id)
+
+        return traditional_house
+
+class TraditionalHouseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.TraditionalHouse.objects.all()
+    serializer_class = prop_serializers.TraditionalHouseSerializer
+    permission_classes = [IsAuthenticated,]
+
+
+#============= COMMERCIAL PROPERTY =======================================================
+class CommercialPropertyListByAgentView(generics.ListAPIView):
+    serializer_class = prop_serializers.CommercialPropertySerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return None
+        try:
+            currentAgentAdmin = agnt_models.AgentAdmin.objects.get(admin=user)
+            # print(currentAgentAdmin.agent.id)
+        except ObjectDoesNotExist:
+            return None
+        
+        commericial_property = prop_models.CommercialProperty.objects.filter(agent=currentAgentAdmin.agent.id)
+
+        return commericial_property
+
+class CommercialPropertyRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.CommercialProperty.objects.all()
+    serializer_class = prop_serializers.CommercialPropertySerializer
+    permission_classes = [IsAuthenticated,]
+
+
+class CommercialPropertyUnitByCommercialPropertyView(generics.ListAPIView):
+    queryset = prop_models.CommercialPropertyUnit.objects.all()
+    serializer_class = prop_serializers.CommercialPropertyUnitSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request, **kwargs):
+        commercial_property_Id = request.query_params.get("commercial_property")
+
+        commercial_property_units = prop_models.CommercialPropertyUnit.objects.filter(commercial_property=commercial_property_Id)
+        # print("commercial_property_units: ",commercial_property_units)
+        if commercial_property_units.exists():
+            commercial_property_unit_serializer = self.get_serializer(commercial_property_units, many=True)
+        
+        else:
+            return Response(data="Commercial Property Unit does not exist for this Commercial Property!", status=status.HTTP_404_NOT_FOUND)
+
+        return Response(data=commercial_property_unit_serializer.data, status=status.HTTP_200_OK)
+
+
+class CommercialPropertyUnitCreateView(generics.CreateAPIView):
+    queryset = prop_models.CommercialPropertyUnit.objects.all()
+    serializer_class = prop_serializers.CommercialPropertyUnitCreateBasicSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def post(self, request, **kwargs):
+
+        commercial_property_id = request.data.get("commercial_property")
+        commercial_property_unit = request.data.get("unit")
+
+        try:
+            commercial_property_instance = prop_models.CommercialProperty.objects.get(pk=commercial_property_id)
+
+        except ObjectDoesNotExist:
+            print(f"Commercial Property {commercial_property_id} is not found!")
+            return Response(data=f"Commercial Property {commercial_property_id} is not found!", status=status.HTTP_404_NOT_FOUND)
+
+        commercial_property_unit_serializer = self.get_serializer(data=commercial_property_unit)
+
+        if commercial_property_unit_serializer.is_valid():
+            try:
+                commercial_property_unit_serializer.save(commercial_property=commercial_property_instance)
+                return Response(data=commercial_property_unit_serializer.data, status=status.HTTP_201_CREATED)
+            except ObjectDoesNotExist:
+                print("Something went wrong when saving commercial property unit!")
+                return Response(data="Something went wrong when saving commercial property unit!", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+        else:
+            print("Commercial property unit data is not valid!")
+            return Response(data="Commercial property unit data is not valid!", status=status.HTTP_400_BAD_REQUEST)
+    
+
+class CommercialPropertyUnitRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = prop_models.CommercialPropertyUnit.objects.all()
+    serializer_class = prop_serializers.CommercialPropertyUnitSerializer
+    permission_classes = [IsAuthenticated,]
+
+
 #================================================================================
 
 class HouseTypeListCreateView(generics.ListCreateAPIView):
