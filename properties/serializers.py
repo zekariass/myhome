@@ -133,17 +133,27 @@ class CommercialPropertyUnitCreateBasicSerializer(serializers.ModelSerializer):
 class LandSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Land
-        fields = "__all__"
+        exclude = ("agent",)
 
 class LandCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Land
         exclude = ("property",)
 #===========ALL PURPOSE PROPERTY===========================================================
+class AllPurposePropertySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.AllPurposeProperty
+        exclude = ("agent",)
+
 class AllPurposePropertyCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.AllPurposeProperty
         exclude = ("property",)
+
+class AllPurposePropertyUnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.AllPurposePropertyUnit
+        fields = "__all__"
 
 class AllPurposePropertyUnitCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -154,12 +164,21 @@ class HallCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Hall
         exclude = ("property",)
+
+class HallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.Hall
+        exclude = ("agent",)
 #===========OFFICE=========================================================================
 class OfficeCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Office
         exclude = ("property",)
 
+class OfficeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.Office
+        exclude = ("agent",)
 #===========EDUCATION FACILITY LEVEL=============================================================
 class EdufaLevelSerializer(serializers.ModelSerializer):
     class Meta:

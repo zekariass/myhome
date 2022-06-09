@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'systems',
     'notifications',
     'commons',
+    'listings',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',

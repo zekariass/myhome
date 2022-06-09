@@ -58,6 +58,8 @@ urlpatterns = [
     #LAND
     path('land/<int:pk>/delete/', views.LandRetrieveUpdateDestroyView.as_view(), name="land-delete"),
     path('land/<int:pk>/update/', views.LandRetrieveUpdateDestroyView.as_view(), name="land-update"),
+    path('land/<int:pk>/detail/', views.LandRetrieveUpdateDestroyView.as_view(), name="land-detail"),
+    path('land/list-by-agent/', views.LandListByAgentView.as_view(), name="land-list-by-agent"),
 
     #SHAREHOUSE
     path('sharehouse/<int:pk>/delete/', views.ShareHouseRetrieveUpdateDestroyView.as_view(), name="sharehouse-delete"),
@@ -113,6 +115,30 @@ urlpatterns = [
     path('sharehouse/<int:pk>/detail/', views.ShareHouseRetrieveUpdateDestroyView.as_view(), name="sharehouse-detail"),
     path('sharehouse/list-by-agent/', views.ShareHouseListByAgentView.as_view(), name="sharehouse-list-by-agent"),
 
+    #OFFICE
+    path('office/<int:pk>/delete/', views.OfficeRetrieveUpdateDestroyView.as_view(), name="office-delete"),
+    path('office/<int:pk>/update/', views.OfficeRetrieveUpdateDestroyView.as_view(), name="office-update"),
+    path('office/<int:pk>/detail/', views.OfficeRetrieveUpdateDestroyView.as_view(), name="office-detail"),
+    path('office/list-by-agent/', views.OfficeListByAgentView.as_view(), name="office-list-by-agent"),
+
+    #HALL
+    path('hall/<int:pk>/delete/', views.HallRetrieveUpdateDestroyView.as_view(), name="hall-delete"),
+    path('hall/<int:pk>/update/', views.HallRetrieveUpdateDestroyView.as_view(), name="hall-update"),
+    path('hall/<int:pk>/detail/', views.HallRetrieveUpdateDestroyView.as_view(), name="hall-detail"),
+    path('hall/list-by-agent/', views.HallListByAgentView.as_view(), name="hall-list-by-agent"),
+
+    #ALL PURPOSE PROPERTY
+    path('allpurposeproperty/<int:pk>/delete/', views.AllPurposePropertyRetrieveUpdateDestroyView.as_view(), name="allpurposeproperty-delete"),
+    path('allpurposeproperty/<int:pk>/update/', views.AllPurposePropertyRetrieveUpdateDestroyView.as_view(), name="allpurposeproperty-update"),
+    path('allpurposeproperty/<int:pk>/detail/', views.AllPurposePropertyRetrieveUpdateDestroyView.as_view(), name="allpurposeproperty-detail"),
+    path('allpurposeproperty/list-by-agent/', views.AllPurposePropertyListByAgentView.as_view(), name="allpurposeproperty-list-by-agent"),
+
+    #ALL PURPOSE PROPERTY UNIT
+    path('allpurposepropertyunit/<int:pk>/delete/', views.AllPurposePropertyUnitRetrieveUpdateDestroyView.as_view(), name="allpurposepropertyunit-delete"),
+    path('allpurposepropertyunit/<int:pk>/update/', views.AllPurposePropertyUnitRetrieveUpdateDestroyView.as_view(), name="allpurposepropertyunit-update"),
+    path('allpurposepropertyunit/create/', views.AllPurposePropertyUnitCreateView.as_view(), name="allpurposepropertyunit-create"),
+    # path('allpurposepropertyunit/<int:pk>/detail/', views.AllPurposePropertyUnitRetrieveUpdateDestroyView.as_view(), name="allpurposepropertyunit-detail"),
+    path('allpurposepropertyunit/list-by-allpurposeproperty/', views.AllPurposePropertyUnitByAllPurposePropertyView.as_view(), name="allpurposepropertyunit-list-by-allpurposeproperty"),
 
 
 ]

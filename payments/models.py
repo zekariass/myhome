@@ -5,14 +5,14 @@ from users import models as u_models
 import os
 
 """Payments may be approved automatically by the system or manually by the admins. Payments that are not approved 
-    will be publicised. Cash, mobile, and bank payments must be approved by administrators for decreasing fraud 
+    will not be publicised. Cash, mobile, and bank payments must be approved by administrators for decreasing fraud 
     transactions, while credit card, voucher and subscription payments will be approved by the system automatically."""
 class PaymentApprovalMode(models.Model):
     mode = models.CharField(verbose_name="Payment approval mode", max_length=20, default="MANUAL", blank=False, null=False)
     description  = models.TextField(null=True, blank=True)
 
-    def __STR__(self):
-        return self.approval_mode
+    def __str__(self):
+        return self.mode
 
 
 """A payment method that users use for paying for services that they get from the system. For instance, 
@@ -23,7 +23,7 @@ class PaymentMethod(models.Model):
     approval_mode = models.ForeignKey(PaymentApprovalMode, on_delete=models.CASCADE, verbose_name="Payment method name")
     description  = models.TextField(null=True, blank=True)
 
-    def __STR__(self):
+    def __str__(self):
         return self.name
 
 """A payment method discount is a discount applied to a specific payment method for using that payment method"""
@@ -47,10 +47,10 @@ class Payment(models.Model):
     paid_amount = models.FloatField(verbose_name="paid amount", default=0.00)
 
     @property
-    def left_amount(self):
+    def unpaid_amount(self):
         return self.total_price - self.paid_amount
 
-    narative = models.TextField(blank=True, null=True)
+    narrative = models.TextField(blank=True, null=True)
 
     
     def get_is_approved_default(self):

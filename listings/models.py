@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils import timezone
-from properties import models as prty_models
+from properties import models as prop_models
 from payments import models as pymnt_models
+from agents import models as agent_models
 from django.conf import settings
 
-"""A payment mode can be selected automatically appropriate for the current user. 
+"""A listing mode can be selected automatically appropriate for the current user. 
     A listing can be free of any charge, subscription-based, or payment mode"""
-class PaymentMode(models.Model):
+class ListingMode(models.Model):
     mode = models.CharField(verbose_name="payment mode", max_length=50, unique=True, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
 
@@ -30,23 +31,28 @@ class ListingState(models.Model):
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.type
+        return self.state
 
 
 """Listing is postings of properties with a specific listing type. The listing can be either for rent or sale"""
-class Listing(models.Model):
-    property = models.ForeignKey(prty_models.Property, on_delete=models.CASCADE, related_name="listed_properties")
+class MainListing(models.Model):
+    property = models.ForeignKey(prop_models.Property, on_delete=models.CASCADE, related_name="listings")
     payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.CASCADE, related_name="listing")
     listing_type = models.ForeignKey(ListingType, on_delete=models.CASCADE, related_name="listings_in_this_type")
     listing_state = models.ForeignKey(ListingState, on_delete=models.CASCADE, related_name="listings_in_this_state")
-    payment_mode = models.ForeignKey(PaymentMode, on_delete=models.CASCADE, related_name="listings_in_this_mode")
+    listing_mode = models.ForeignKey(ListingMode, on_delete=models.CASCADE, related_name="listings_in_this_mode")
+    agent = models.ForeignKey(agent_models.Agent, on_delete=models.CASCADE, verbose_name='agent who creates this listing', null=True, blank=True)
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+    def save(self, *args, **kwargs):
+        self.agent = self.property.agent.id
+        super(MainListing, self).save(*args, **kwargs)
 
 
 """Normal users may save a listing for checking later"""
 class SavedListing(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_by_user")
+    main_listing = models.ForeignKey(MainListing, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_listing")
     saved_on = models.DateTimeField(default=timezone.now, editable=False)
 
 
@@ -61,8 +67,66 @@ class FeaturedListingState(models.Model):
 """An agent may pay more to feature their specific listing. When a listing is featured, it will show up 
     on more searches than normal searches and allows it to be listed on the landing page"""
 class FeaturedListing(models.Model):
-    listing = models.OneToOneField(Listing, on_delete=models.CASCADE)
+    main_listing = models.ForeignKey(MainListing, on_delete=models.CASCADE, related_name="features")
     feature_payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.CASCADE)
     featured_listing_state = models.ForeignKey(FeaturedListingState, on_delete=models.SET_DEFAULT, default="EXPIRED")
     featured_on = models.DateTimeField(default=timezone.now, editable=False)
     expire_on = models.DateTimeField(editable=True, null=False, blank=False)
+
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(fields=["main_listing","featured_listing_state"], name="single_state_featured_listing")
+    #     ]
+
+
+#NEWLY ADDED TABLES FOR LISTING BY PROPERTY CATEGORY
+
+class ApartmentUnitListing(models.Model):
+    apartment_unit = models.ForeignKey(prop_models.ApartmentUnit, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="apartment_unit_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class CommercialPropertyUnitListing(models.Model):
+    commercial_property_unit = models.ForeignKey(prop_models.CommercialPropertyUnit, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="commercial_property_unit_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class AllPurposePropertyUnitListing(models.Model):
+    all_purpose_property_unit = models.ForeignKey(prop_models.AllPurposePropertyUnit, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="all_purpose_property_unit_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class CondominiumListing(models.Model):
+    condominium = models.ForeignKey(prop_models.Condominium, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="condominium_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class TraditionalHouseListing(models.Model):
+    traditional_house = models.ForeignKey(prop_models.TraditionalHouse, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="traditional_house_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class ShareHouseListing(models.Model):
+    Share_house = models.ForeignKey(prop_models.ShareHouse, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="Share_house_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class VillaListing(models.Model):
+    villa = models.ForeignKey(prop_models.Villa, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="villa_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class OfficeListing(models.Model):
+    office = models.ForeignKey(prop_models.Office, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="office_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class HallListing(models.Model):
+    hall = models.ForeignKey(prop_models.Hall, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="hall_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+class LandListing(models.Model):
+    land = models.ForeignKey(prop_models.Land, on_delete=models.CASCADE, related_name="listings")
+    main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="land_listing")
+    listed_on = models.DateTimeField(default=timezone.now, editable=False)
