@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils import timezone
-from properties import models as prop_models
+import properties.models as prop_models
 from payments import models as pymnt_models
 from agents import models as agent_models
+from systems import models as sys_models
 from django.conf import settings
 
 """A listing mode can be selected automatically appropriate for the current user. 
@@ -36,16 +37,40 @@ class ListingState(models.Model):
 
 """Listing is postings of properties with a specific listing type. The listing can be either for rent or sale"""
 class MainListing(models.Model):
+
+    LISTING_MODES = [ 
+        ("SUBSCRIPTION", "Subscription"),
+        ("PAY_PER_LISTING", "Pay-per-listing"),
+    ]
+
+    LISTING_STATES = [
+        ("ACTIVE", "Active"),
+        ("INACTIVE", "Inactive"),
+        ("SUSPENDED", "Suspended"),
+        ("EXPIRED", "Expired"),
+    ]
+
     property = models.ForeignKey(prop_models.Property, on_delete=models.CASCADE, related_name="listings")
-    payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.CASCADE, related_name="listing")
-    listing_type = models.ForeignKey(ListingType, on_delete=models.CASCADE, related_name="listings_in_this_type")
-    listing_state = models.ForeignKey(ListingState, on_delete=models.CASCADE, related_name="listings_in_this_state")
-    listing_mode = models.ForeignKey(ListingMode, on_delete=models.CASCADE, related_name="listings_in_this_mode")
+    payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.SET_NULL, null=True, related_name="listing")
+    listing_type = models.ForeignKey(ListingType, on_delete=models.SET_NULL, null=True, related_name="listings_in_this_type")
+    # listing_state = models.ForeignKey(ListingState, on_delete=models.SET_NULL, null=True, related_name="listings_in_this_state")
+    # listing_mode = models.ForeignKey(ListingMode, on_delete=models.SET_NULL, null=True, related_name="listings_in_this_mode")
+    listing_state = models.CharField(max_length=50, choices=LISTING_STATES, default=LISTING_STATES[1][0])
+    listing_mode = models.CharField(max_length=50, choices=LISTING_MODES, default=LISTING_MODES[1][0], null=True)
+    property_price = models.FloatField(verbose_name="property price", default=0.00)
+    listing_currency = models.ForeignKey(sys_models.Currency ,verbose_name="property price currency type", on_delete=models.SET_NULL, null=True)
+    deposit_in_months = models.SmallIntegerField(verbose_name="number of months that deposit is required", default=0)
+    is_approved = models.BooleanField(default=False)
     agent = models.ForeignKey(agent_models.Agent, on_delete=models.CASCADE, verbose_name='agent who creates this listing', null=True, blank=True)
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
 
     def save(self, *args, **kwargs):
-        self.agent = self.property.agent.id
+        self.agent = self.property.agent
+        if self.payment:
+            if self.payment.payment_method.cat_key == "PM04":
+                self.listing_mode = "SUBSCRIPTION"
+            else:
+                self.listing_mode = "PAY_PER_LISTING"
         super(MainListing, self).save(*args, **kwargs)
 
 

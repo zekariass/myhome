@@ -23,6 +23,8 @@ from agents import urls as agent_urls
 from commons import urls as cmn_urls
 from properties import urls as prop_urls
 from systems import urls as sys_urls
+from listings import urls as list_urls
+from payments import urls as pay_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,5 +32,7 @@ urlpatterns = [
     path('agent/', include(agent_urls)),
     path('common/', include(cmn_urls)),
     path('property/', include(prop_urls)),
-    path('system/', include(sys_urls))
+    path('system/', include(sys_urls)),
+    path('listing/', include(list_urls)),
+    path('payment/', include(pay_urls)),
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

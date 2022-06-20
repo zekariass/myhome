@@ -9,3 +9,15 @@ class SystemParameterListView(generics.ListAPIView):
     queryset = sys_models.SystemParameter.objects.all()
     serializer_class = sys_serializers.SystemParameterSerializer
     permission_classes = [AllowAny,]
+
+
+class ListingParameterListView(generics.ListAPIView):
+    queryset = sys_models.ListingParameter.objects.all()
+    serializer_class = sys_serializers.ListingParameterSerializer
+    permission_classes = [AllowAny,]
+
+
+class CurrencyListView(generics.ListAPIView):
+    queryset = sys_models.Currency.objects.all()
+    serializer_class = sys_serializers.CurrencySerializer
+    permission_classes = [AllowAny,]

@@ -3,6 +3,10 @@ from django.db import models
 from django.utils import timezone
 from agents import models as agnt_models
 from commons import models as cmn_models
+from systems import models as sys_models
+# import listings.models as list_models
+# import listings
+from properties.mixins import CommonPropertiesMixin
 
 
 """A point of interest category is a category of point of interest near to a property"""
@@ -259,7 +263,7 @@ class Condominium(models.Model):
 """A villa is a large, detached structure with spacious land surrounding it. It is very luxurious and 
     may include amenities such as a pool, stables, and gardens. A villa is generally home to a single-family,
     in contrast to condos and townhomes that are designed to house multiple families. """
-class Villa(models.Model):
+class Villa(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="villa")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
@@ -271,6 +275,7 @@ class Villa(models.Model):
     is_new = models.BooleanField(verbose_name='is the villa new?', default=False)
     agent = models.BigIntegerField(verbose_name='agent who creates the villa', null=True, blank=True)
     
+
     def save(self, *args, **kwargs):
         self.agent = self.property.agent.id
         super(Villa, self).save(*args, **kwargs)
@@ -451,12 +456,20 @@ class AllPurposePropertyUnit(models.Model):
 
 """Every category may have a different listing price set by administrators"""
 class ListingPriceByCategory(models.Model):
-    property_category = models.ForeignKey(PropertyCategory, related_name='category_listing_price', on_delete=models.CASCADE)
+    import listings.models as list_models
+    property_category = models.ForeignKey(PropertyCategory, related_name='listing_price', on_delete=models.CASCADE)
+    listing_type = models.ForeignKey(list_models.ListingType, on_delete=models.CASCADE)
     price_label = models.CharField(verbose_name='label (name) for this pricing', max_length=100)
     price = models.FloatField(verbose_name='listing price', default=0.00)
     description = models.TextField(blank=True, null=True)
+    currency = models.ForeignKey(sys_models.Currency, on_delete=models.SET_NULL, null=True)
     Added_on = models.DateTimeField(default=timezone.now, editable=False)
     expired_on = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["property_category","listing_type"], name="prop_listing_price_unique_together_constraint")
+        ]
 
     @property
     def is_expired(self):
@@ -464,17 +477,24 @@ class ListingPriceByCategory(models.Model):
         return expired
 
     def __str__(self):
-        return '%s %d' % (self.property_category.name, self.price)
+        return '%s %s %d %s' % (self.property_category.name, self.listing_type.type, self.price, self.currency.symbol)
 
 
 """Each category may have a discount for listing set by an administrator"""
 class ListingDiscountByCategory(models.Model):
     property_category = models.ForeignKey(PropertyCategory, related_name='category_discount', on_delete=models.CASCADE)
+    listing_param = models.ForeignKey(sys_models.ListingParameter, related_name='listing_discount', on_delete=models.CASCADE)
+    param_value = models.CharField(verbose_name="Listing parameter value", max_length=100, default="0")
     discount_percentage = models.FloatField(verbose_name='listing discount by percentage', default=0.00)
     discount_fixed = models.FloatField(verbose_name='listing discount fixed', default=0.00)
     description = models.TextField(blank=True, null=True)
-    discount_start_on = models.DateTimeField(verbose_name='when the discount starts' ,default=timezone.now, editable=True)
+    discount_start_on = models.DateTimeField(verbose_name='when the discount starts', default=timezone.now, editable=True)
     expired_on = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["property_category","listing_param"], name="discount_unique_constraint")
+        ]
 
     @property
     def is_expired(self):
@@ -482,14 +502,15 @@ class ListingDiscountByCategory(models.Model):
         return expired
 
     def __str__(self):
-        return '%s percentage discount %d, fixed discount %d' % (self.property_category.name, 
-            self.discount_percentage, self.discount_fixed)
+        return '%s, %s, percentage:  %d, fixed:  %d, %s' % (self.property_category.name, self.listing_param.name,
+            self.discount_percentage, self.discount_fixed, self.listing_param.value_type)
 
 
 """Listing Discount by Category table will contain a unique record at any point in time.
      But the discount may be needed to be stored for report purposes. This table stores discount records"""
 class ListingDiscountByCategoryHistory(models.Model):
     property_category = models.ForeignKey(PropertyCategory, related_name='category_discount_history', on_delete=models.CASCADE)
+    listing_param = models.ForeignKey(sys_models.ListingParameter, related_name='listing_discount_history', on_delete=models.CASCADE)
     discount_percentage = models.FloatField(verbose_name='listing discount by percentage', default=0.00)
     discount_fixed = models.FloatField(verbose_name='listing discount fixed', default=0.00)
     description = models.TextField(blank=True, null=True)

@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 ('total_price', models.FloatField(default=0.0, verbose_name='total price to be paid')),
                 ('paid_amount', models.FloatField(default=0.0, verbose_name='paid amount')),
                 ('narative', models.TextField(blank=True, null=True)),
-                ('is_approved', models.BooleanField(default=payments.models.Payment.get_is_approved_default)),
+                ('is_approved', models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(

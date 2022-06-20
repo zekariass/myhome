@@ -1099,5 +1099,41 @@ class ListingDiscountByCategoryListCreateView(generics.ListCreateAPIView):
     serializer_class = prop_serializers.ListingDiscountByCategorySerializer
     # permission_classes = [IsAuthenticated,]
 
-    # def get_queryset(self):
-    #     return prop_models.ListingDiscountByCategory.objects.filter(is_expired=True)
+    def get(self, request, **kwargs):
+
+        category_key = request.query_params.get("property_category")
+
+        try:
+            category_instance = prop_models.PropertyCategory.objects.get(cat_key=category_key)
+        except ObjectDoesNotExist:
+            return Response(data="Property Category is not found!", status=status.HTTP_404_NOT_FOUND)
+
+        property_discounts = prop_models.ListingDiscountByCategory.objects.filter(property_category=category_instance.id)
+
+        if property_discounts.exists():
+            return Response(data=self.get_serializer(property_discounts, many=True).data, status=status.HTTP_200_OK)
+        else:
+            return Response(data="Property discount is not found!", status=status.HTTP_404_NOT_FOUND)
+
+
+#===================LISTING PRICE BY CATEGORY====================================================================
+class ListingPriceByCategoryListCreateView(generics.ListCreateAPIView):
+    queryset = prop_models.ListingPriceByCategory.objects.all()
+    serializer_class = prop_serializers.ListingPriceByCategorySerializer
+    # permission_classes = [IsAuthenticated,]
+
+    def get(self, request, **kwargs):
+
+        category_key = request.query_params.get("property_category")
+
+        try:
+            category_instance = prop_models.PropertyCategory.objects.get(cat_key=category_key)
+        except ObjectDoesNotExist:
+            return Response(data="Property Category is not found!", status=status.HTTP_404_NOT_FOUND)
+
+        property_prices = prop_models.ListingPriceByCategory.objects.filter(property_category=category_instance.id)
+
+        if property_prices.exists():
+            return Response(data=self.get_serializer(property_prices, many=True).data, status=status.HTTP_200_OK)
+        else:
+            return Response(data="Property price is not found!", status=status.HTTP_404_NOT_FOUND)

@@ -55,6 +55,9 @@ urlpatterns = [
     #LISTING DISCOUNT BY CATEGORY
     path('listing-discount-by-category/list/', views.ListingDiscountByCategoryListCreateView.as_view(), name="listing-discount-by-category-list"),
 
+    #LISTING PRICE BY CATEGORY
+    path('listing-price-by-category/list/', views.ListingPriceByCategoryListCreateView.as_view(), name="listing-price-by-category-list"),
+
     #LAND
     path('land/<int:pk>/delete/', views.LandRetrieveUpdateDestroyView.as_view(), name="land-delete"),
     path('land/<int:pk>/update/', views.LandRetrieveUpdateDestroyView.as_view(), name="land-update"),

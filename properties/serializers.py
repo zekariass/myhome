@@ -4,9 +4,9 @@ from sympy import source
 from properties import models as prop_models
 from commons import serializers as cmn_serializers
 from agents import serializers as agnt_serializers
+from systems import serializers as sys_serializers
+from listings import serializers as list_serializers
 from django.core.exceptions import ObjectDoesNotExist
-
-from properties import relations
 
 #===========HOUSE TYPE=====================================================================
 class HouseTypeSerializer(serializers.ModelSerializer):
@@ -69,7 +69,20 @@ class VillaCreateBasicSerializer(serializers.ModelSerializer):
 class VillaSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Villa
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = (
+            "id",
+            "cat_key",
+            "number_of_rooms",
+            "number_of_bed_rooms",
+            "floor",
+            "number_of_baths",
+            "total_compound_area",
+            "housing_area",
+            "is_furnished",
+            "is_new",
+            "property"
+            )
 #===========TRADITIONAL HOUSE==============================================================
 class TraditionalHouseCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -251,8 +264,23 @@ class RuleSerializer(serializers.ModelSerializer):
         model = prop_models.Rule
         exclude = ("property",)
 
-#===========PROPERTY=======================================================================
+#===========LISTING DISCOUNT BY CATEGORY==================================================================
+class ListingDiscountByCategorySerializer(serializers.ModelSerializer):
+    is_expired = serializers.ReadOnlyField()
+    listing_param = sys_serializers.ListingParameterSerializer(read_only=True)
+    class Meta:
+        model = prop_models.ListingDiscountByCategory
+        fields = "__all__"
 
+#===========LISTING PRICE BY CATEGORY==================================================================
+class ListingPriceByCategorySerializer(serializers.ModelSerializer):
+    currency = sys_serializers.CurrencySerializer(read_only=True)
+    listing_type = list_serializers.ListingTypeSerializer(read_only=True)
+    class Meta:
+        model = prop_models.ListingPriceByCategory
+        fields = "__all__"
+
+#===========PROPERTY=======================================================================
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.PropertyImage
@@ -270,6 +298,8 @@ class PropertyVirtualTourSerializer(serializers.ModelSerializer):
 
 class PropertyCategorySerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(read_only=True, many=True)
+    # category_discount = ListingDiscountByCategorySerializer(read_only=True, many=True)
+    # listing_price = ListingPriceByCategorySerializer(read_only=True, many=True)
     class Meta:
         model = prop_models.PropertyCategory
         fields = "__all__"
@@ -280,6 +310,15 @@ class PropertyCategorySlugSerializer(serializers.ModelSerializer):
         model = prop_models.PropertyCategory
         fields = "__all__"
         lookup_field = "cat_key"
+
+
+# class PropertyCategoryWithPriceAndDiscountInfoSlugSerializer(serializers.ModelSerializer):
+#     # amenities = AmenitySerializer(read_only=True, many=True)
+#     class Meta:
+#         model = prop_models.PropertyCategory
+#         fields = "__all__"
+#         lookup_field = "cat_key"
+
 
 class PropertyCreateBasicSerializer(serializers.ModelSerializer):
     images_count = serializers.SerializerMethodField(read_only=True)
@@ -368,9 +407,4 @@ class PropertyFileLabelSerializer(serializers.ModelSerializer):
         model = prop_models.PropertyFileLabel
         fields = "__all__"
 
-#===========LISTING DISCOUNT BY CATEGORY==================================================================
-class ListingDiscountByCategorySerializer(serializers.ModelSerializer):
-    is_expired = serializers.ReadOnlyField()
-    class Meta:
-        model = prop_models.ListingDiscountByCategory
-        fields = "__all__"
+
