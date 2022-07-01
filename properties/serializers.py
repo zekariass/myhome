@@ -36,7 +36,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = prop_models.Apartment
-        fields = ("id","floors","is_new","is_multi_unit","property")
+        fields = ("id", "cat_key", "floors","is_new","is_multi_unit","property", "agent")
 
 class ApartmentCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,10 +44,20 @@ class ApartmentCreateBasicSerializer(serializers.ModelSerializer):
         exclude = ("property",)
 
 class ApartmentUnitSerializer(serializers.ModelSerializer):
-    # apartment = ApartmentCreateBasicSerializer()
+    property = serializers.IntegerField(read_only=True, source="apartment.property.id")
     class Meta:
         model = prop_models.ApartmentUnit
-        fields = "__all__"
+        fields = ("id",
+                "cat_key",
+                "apartment",
+                "number_of_rooms",
+                "number_of_bed_rooms",
+                "number_of_baths",
+                "floor",
+                "area",
+                "is_furnished",
+                "is_available",
+                "property")
 
 
 #===========CONDOMINIUM====================================================================
@@ -59,7 +69,18 @@ class CondominiumCreateBasicSerializer(serializers.ModelSerializer):
 class CondominiumSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Condominium
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "property",
+                "number_of_rooms",
+                "number_of_bed_rooms",
+                "floor",
+                "number_of_baths",
+                "area",
+                "is_furnished",
+                "is_new",
+                "agent")
 #===========VILLA==========================================================================
 class VillaCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -92,12 +113,38 @@ class TraditionalHouseCreateBasicSerializer(serializers.ModelSerializer):
 class TraditionalHouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.TraditionalHouse
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "number_of_rooms",
+                "number_of_bed_rooms",
+                "floor",
+                "number_of_baths",
+                "area",
+                "is_furnished",
+                "is_new",
+                "agent",
+                "property")
 #===========SHARE HOUSE====================================================================
 class ShareHouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.ShareHouse
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "property",
+                "house_type",
+                "total_number_of_rooms",
+                "number_of_rooms_to_share",
+                "total_number_of_bed_rooms",
+                "number_of_bed_rooms_to_share",
+                "total_number_of_baths",
+                "number_of_baths_to_share",
+                "floor",
+                "area",
+                "is_furnished",
+                "is_new",
+                "agent")
 
 class ShareHouseCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -113,30 +160,30 @@ class CommercialPropertySerializer(serializers.ModelSerializer):
     # building_type = BuildingTypeSerializer(read_only=True)
     class Meta:
         model = prop_models.CommercialProperty
-        exclude = ("agent",)
-
-    # def update(self, instance, validated_data):
-
-    #     building_type_id = validated_data.pop("building_type")
-
-    #     instance.id = validated_data.get("id", instance.id)
-    #     instance.floors = validated_data.get("floors", instance.floors)
-    #     instance.is_new = validated_data.get("is_new", instance.is_new)
-    #     instance.has_parking_space = validated_data.get("has_parking_space", instance.has_parking_space)
-    #     instance.is_multi_unit = validated_data.get("is_multi_unit", instance.is_multi_unit)
-
-    #     try:
-    #         building_type_instance = prop_models.BuildingType.objects.get(pk=building_type_id)
-    #         instance.save(building_type=building_type_instance)
-    #         return instance
-    #     except:
-    #         raise ObjectDoesNotExist
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "property",
+                "building_type",
+                "floors",
+                "is_new",
+                "has_parking_space",
+                "is_multi_unit",
+                "agent")
 
 
 class CommercialPropertyUnitSerializer(serializers.ModelSerializer):
+    property = serializers.IntegerField(read_only=True, source="commercial_property.property.id")
     class Meta:
         model = prop_models.CommercialPropertyUnit
-        fields = "__all__"
+        fields = ("id",
+                "cat_key",
+                "commercial_property",
+                "number_of_rooms",
+                "area",
+                "floor",
+                "com_prop_unit_description",
+                "property")
 
 class CommercialPropertyUnitCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -146,7 +193,16 @@ class CommercialPropertyUnitCreateBasicSerializer(serializers.ModelSerializer):
 class LandSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Land
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "property",
+                "area",
+                "length",
+                "width",
+                "has_plan",
+                "has_debt",
+                "agent")
 
 class LandCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -156,7 +212,17 @@ class LandCreateBasicSerializer(serializers.ModelSerializer):
 class AllPurposePropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.AllPurposeProperty
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "property",
+                "building_type",
+                "floors",
+                "best_for",
+                "all_purpose_property_description",
+                "has_parking_space",
+                "is_multi_unit",
+                "agent")
 
 class AllPurposePropertyCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -164,9 +230,17 @@ class AllPurposePropertyCreateBasicSerializer(serializers.ModelSerializer):
         exclude = ("property",)
 
 class AllPurposePropertyUnitSerializer(serializers.ModelSerializer):
+    property = serializers.IntegerField(read_only=True, source="all_purpose_property.property.id")
     class Meta:
         model = prop_models.AllPurposePropertyUnit
-        fields = "__all__"
+        fields = ("id",
+                "cat_key",
+                "all_purpose_property",
+                "floor",
+                "number_of_rooms",
+                "area",
+                "all_purpose_property_unit_description",
+                "property")
 
 class AllPurposePropertyUnitCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -181,7 +255,17 @@ class HallCreateBasicSerializer(serializers.ModelSerializer):
 class HallSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Hall
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "property",
+                "floor",
+                "number_of_seats",
+                "total_capacity",
+                "has_parking_space",
+                "number_of_parking_spaces",
+                "hall_description",
+                "agent")
 #===========OFFICE=========================================================================
 class OfficeCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -191,7 +275,18 @@ class OfficeCreateBasicSerializer(serializers.ModelSerializer):
 class OfficeSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.Office
-        exclude = ("agent",)
+        # exclude = ("agent",)
+        fields = ("id",
+                "cat_key",
+                "building_type",
+                "floor",
+                "number_of_rooms",
+                "area",
+                "is_furnished",
+                "is_new",
+                "has_parking_space",
+                "agent",
+                "property")
 #===========EDUCATION FACILITY LEVEL=============================================================
 class EdufaLevelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -281,10 +376,24 @@ class ListingPriceByCategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 #===========PROPERTY=======================================================================
+# class PropertyFileLabelSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = prop_models.PropertyFileLabel
+#         fields = "__all__"
+
 class PropertyImageSerializer(serializers.ModelSerializer):
+    label_name = serializers.CharField(source="label", read_only=True)
     class Meta:
         model = prop_models.PropertyImage
-        exclude = ("property",)
+        # exclude = ("property",)
+        fields = (
+            "id",
+            # "property",
+            "image",
+            "label",
+            "uploaded_on",
+            "label_name"
+            )
 
 class PropertyVideoSerializer(serializers.ModelSerializer):
     class Meta:

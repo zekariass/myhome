@@ -1,9 +1,11 @@
 from django.db import models
 from django.utils import timezone
+from myhome.strings import *
 import properties.models as prop_models
 from payments import models as pymnt_models
 from agents import models as agent_models
 from systems import models as sys_models
+import myhome.strings
 from django.conf import settings
 
 """A listing mode can be selected automatically appropriate for the current user. 
@@ -46,9 +48,18 @@ class MainListing(models.Model):
     LISTING_STATES = [
         ("ACTIVE", "Active"),
         ("INACTIVE", "Inactive"),
-        ("SUSPENDED", "Suspended"),
-        ("EXPIRED", "Expired"),
+        ("UNAVAILABLE", "Unavailable"),
     ]
+
+    @property
+    def address(self):
+        return self.property.address
+    @property
+    def property_category(self):
+        return self.property.property_category.id
+    @property
+    def property_image(self):
+        return self.property.images
 
     property = models.ForeignKey(prop_models.Property, on_delete=models.CASCADE, related_name="listings")
     payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.SET_NULL, null=True, related_name="listing")
@@ -61,17 +72,21 @@ class MainListing(models.Model):
     listing_currency = models.ForeignKey(sys_models.Currency ,verbose_name="property price currency type", on_delete=models.SET_NULL, null=True)
     deposit_in_months = models.SmallIntegerField(verbose_name="number of months that deposit is required", default=0)
     is_approved = models.BooleanField(default=False)
+    is_expired = models.BooleanField(default=False)
     agent = models.ForeignKey(agent_models.Agent, on_delete=models.CASCADE, verbose_name='agent who creates this listing', null=True, blank=True)
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
 
     def save(self, *args, **kwargs):
         self.agent = self.property.agent
         if self.payment:
-            if self.payment.payment_method.cat_key == "PM04":
+            if self.payment.payment_method.pm_key == PM_SUBSCRIPTION:
                 self.listing_mode = "SUBSCRIPTION"
             else:
                 self.listing_mode = "PAY_PER_LISTING"
         super(MainListing, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.id} {self.property.property_category.name} {self.listing_state} ..... IS_APPROVED: {self.is_approved}"
 
 
 """Normal users may save a listing for checking later"""
@@ -108,18 +123,29 @@ class FeaturedListing(models.Model):
 
 class ApartmentUnitListing(models.Model):
     apartment_unit = models.ForeignKey(prop_models.ApartmentUnit, on_delete=models.CASCADE, related_name="listings")
+    apartment = models.ForeignKey(prop_models.Apartment, on_delete=models.CASCADE, related_name="unit_listings")
     main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="apartment_unit_listing")
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
 
+    def save(self, *args, **kwargs):
+        self.apartment = self.apartment_unit.apartment
+        super(ApartmentUnitListing, self).save(*args, **kwargs)
+
 class CommercialPropertyUnitListing(models.Model):
     commercial_property_unit = models.ForeignKey(prop_models.CommercialPropertyUnit, on_delete=models.CASCADE, related_name="listings")
+    commercial_property = models.ForeignKey(prop_models.CommercialProperty, on_delete=models.CASCADE, related_name="unit_listings")
     main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="commercial_property_unit_listing")
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
 
 class AllPurposePropertyUnitListing(models.Model):
     all_purpose_property_unit = models.ForeignKey(prop_models.AllPurposePropertyUnit, on_delete=models.CASCADE, related_name="listings")
+    all_purpose_property = models.ForeignKey(prop_models.AllPurposeProperty, on_delete=models.CASCADE, related_name="unit_listings")
     main_listing = models.OneToOneField(MainListing, on_delete=models.CASCADE, related_name="all_purpose_property_unit_listing")
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
+
+    def save(self, *args, **kwargs):
+        self.all_purpose_property = self.all_purpose_property_unit.all_purpose_property
+        super(AllPurposePropertyUnitListing, self).save(*args, **kwargs)
 
 class CondominiumListing(models.Model):
     condominium = models.ForeignKey(prop_models.Condominium, on_delete=models.CASCADE, related_name="listings")

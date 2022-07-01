@@ -207,16 +207,12 @@ class PropertyAmenity(models.Model):
         ]
 
 """Apartment"""
-class Apartment(models.Model):
+class Apartment(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="apartment")
     floors = models.IntegerField(verbose_name='apartment number of floors', default=0)
     is_new = models.BooleanField(verbose_name='is property new?', default=False, blank=True)
     is_multi_unit = models.BooleanField(verbose_name='is multi unit?', default=False, blank=True)
     agent = models.BigIntegerField(verbose_name='agent who creates the apartment', null=True, blank=True)
-
-    # @property
-    # def property_agent(self):
-    #     return self._property.agent
 
     def save(self, *args, **kwargs):
         self.agent = self.property.agent.id
@@ -236,11 +232,15 @@ class ApartmentUnit(models.Model):
     is_furnished = models.BooleanField(verbose_name='is apartment unit furnished?', default=False)
     is_available = models.BooleanField(verbose_name='is apartment available?', default=True)
 
+    @property
+    def cat_key(self):
+        return self.apartment.cat_key
+
     def __str__(self):
         return '%s room and %s bed room apartment' % (self.number_of_rooms, self.number_of_bed_rooms)
 
 """Condominiums are sort of apartments where many residents live in neighbourhood"""
-class Condominium(models.Model):
+class Condominium(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="condominium")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
@@ -285,7 +285,7 @@ class Villa(models.Model, CommonPropertiesMixin):
 
 
 """The office is a property that is used for office purposes"""
-class TraditionalHouse(models.Model):
+class TraditionalHouse(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="traditional_house")
     number_of_rooms = models.IntegerField(default=1)
     number_of_bed_rooms = models.IntegerField(default=1)
@@ -312,7 +312,7 @@ class HouseType(models.Model):
         return self.type
 
 """Share House is a house that someone may share it with someone else"""
-class ShareHouse(models.Model):
+class ShareHouse(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="share_house")
     house_type = models.ForeignKey(HouseType, related_name='share_houses',  
         verbose_name='share house type', on_delete=models.SET_NULL, null=True)
@@ -341,7 +341,7 @@ class BuildingType(models.Model):
         return self.type
 
 """The office is a property that is used for office purposes"""
-class Office(models.Model):
+class Office(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="office")
     building_type = models.ForeignKey(BuildingType, related_name='officess',  
         verbose_name='office building type', on_delete=models.SET_NULL, null=True)
@@ -363,7 +363,7 @@ class Office(models.Model):
 
 
 """Commercial property is a property that is used for commercial or trading purposes"""
-class CommercialProperty(models.Model):
+class CommercialProperty(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="commercial_property")
     building_type = models.ForeignKey(BuildingType, related_name='commercial_properties',  
                     verbose_name='commercial property building type', on_delete=models.SET_NULL, null=True)
@@ -387,12 +387,16 @@ class CommercialPropertyUnit(models.Model):
     floor = models.IntegerField(default=0)
     com_prop_unit_description = models.TextField(null=False, blank=False)
 
+    @property
+    def cat_key(self):
+        return self.commercial_property.cat_key
+
     def __str__(self):
         return '%s rooms commercial property' % (self.number_of_rooms)
 
 
 """Hall is a wide room used for meetings and various ceremonies"""
-class Hall(models.Model):
+class Hall(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="hall")
     floor = models.IntegerField(verbose_name='Hall floor level', default=0)
     number_of_seats = models.IntegerField(verbose_name='how many seats it has?', default=5)
@@ -410,7 +414,7 @@ class Hall(models.Model):
         return '%s seats hall' % (self.number_of_seats)
 
 """Land properties for sale. This property type is advertised for sale only"""
-class Land(models.Model):
+class Land(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="land")
     area = models.FloatField(verbose_name='area of the land', default=0.00) 
     length = models.FloatField(verbose_name='length of the land', default=0.00)
@@ -428,7 +432,7 @@ class Land(models.Model):
 
 
 """Versatile property is all fit property that can be used for commercial purposes, offices, or even for residence"""
-class AllPurposeProperty(models.Model):
+class AllPurposeProperty(models.Model, CommonPropertiesMixin):
     property = models.OneToOneField(Property, on_delete=models.CASCADE, verbose_name="parent property", related_name="all_purpose_property")
     building_type = models.ForeignKey(BuildingType, related_name='all_purpose_properties',  
                     verbose_name='all purpose property building type', on_delete=models.SET_NULL, null=True)
@@ -449,6 +453,11 @@ class AllPurposePropertyUnit(models.Model):
     number_of_rooms = models.IntegerField(default=1)
     area = models.FloatField(default=0.00)
     all_purpose_property_unit_description = models.TextField(blank=True, null=True)
+
+    @property
+    def cat_key(self):
+        return self.all_purpose_property.cat_key
+
 
     def __str__(self):
         return '%s floor versatile versatile unit' % (self.floor)

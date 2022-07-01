@@ -107,7 +107,7 @@ class Payment(models.Model):
         return self.total_price - self.paid_amount
 
     def __str__(self):
-        return self.total_price
+        return f"{self.total_price}"
 
 
 # """Payment can be done with one or more methods. For instance, a portion of the rice can be covered 

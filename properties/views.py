@@ -17,7 +17,7 @@ from agents import serializers as agnt_serializers
 class PropertyCategoryListCreateView(generics.ListCreateAPIView):
     queryset = prop_models.PropertyCategory.objects.all()
     serializer_class = prop_serializers.PropertyCategorySerializer
-    # permission_classes = [IsAuthenticated,]
+    permission_classes = [AllowAny,]
 
 class PropertyCategorySlugRetrieveView(generics.RetrieveAPIView):
     queryset = prop_models.PropertyCategory.objects.all()
@@ -1102,6 +1102,7 @@ class ListingDiscountByCategoryListCreateView(generics.ListCreateAPIView):
     def get(self, request, **kwargs):
 
         category_key = request.query_params.get("property_category")
+        print("YOOOO!!! ",category_key)
 
         try:
             category_instance = prop_models.PropertyCategory.objects.get(cat_key=category_key)
@@ -1113,7 +1114,7 @@ class ListingDiscountByCategoryListCreateView(generics.ListCreateAPIView):
         if property_discounts.exists():
             return Response(data=self.get_serializer(property_discounts, many=True).data, status=status.HTTP_200_OK)
         else:
-            return Response(data="Property discount is not found!", status=status.HTTP_404_NOT_FOUND)
+            return Response(data=[], status=status.HTTP_404_NOT_FOUND)
 
 
 #===================LISTING PRICE BY CATEGORY====================================================================
@@ -1136,4 +1137,4 @@ class ListingPriceByCategoryListCreateView(generics.ListCreateAPIView):
         if property_prices.exists():
             return Response(data=self.get_serializer(property_prices, many=True).data, status=status.HTTP_200_OK)
         else:
-            return Response(data="Property price is not found!", status=status.HTTP_404_NOT_FOUND)
+            return Response(data=[], status=status.HTTP_404_NOT_FOUND)
