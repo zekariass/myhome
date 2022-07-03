@@ -11,7 +11,8 @@ urlpatterns = [
     path("agent-listing/count/", views.AgentNumberOfListingView.as_view(), name="agent-listing-count"),
     path("list-by-property/", views.ListingListByProperty.as_view(), name="listing-list-by-property"),
     path("list-by-agent/", views.ListingListByAgent.as_view(), name="listing-list-by-agent"),
-    path("public/search/", views.PublicListingListView.as_view(), name="listing-public-search"),
+    path("public/search/", views.PublicListingListView.as_view(), name="public-listing-search"),
+    path("public/<int:pk>/detail/", views.PublicListingRetrieveView.as_view(), name="public-listing-retrieve"),
     path("list-by-unit/", views.ListingListByPropertyUnit.as_view(), name="listing-list-by-unit"),
 
     path("<int:pk>/update/", views.MainListingRetrieveUpdateDestroyView.as_view(), name="listing-update"),

@@ -87,3 +87,9 @@ class AddressRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = cmn_models.Address.objects.all()
     serializer_class = serializers.AddressShortDepthSerializer
     permission_classes = [AllowAny,]
+
+
+class PeriodicityListView(generics.ListAPIView):
+    queryset = cmn_models.Periodicity.objects.all()
+    serializer_class = serializers.PeriodicitySerializer
+    permission_classes = [AllowAny,]

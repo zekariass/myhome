@@ -53,8 +53,8 @@ class Address(models.Model):
 
 """Periodicity is used to set a period for a specific purpose, such as daily, weekly, monthly, and annual subscriptions"""
 class Periodicity(models.Model):
-    period = models.CharField(verbose_name="period label or name", max_length=30)
-    num_of_days = models.IntegerField(verbose_name="number of days in this period", default=1)
+    period = models.CharField(verbose_name="period label or name", max_length=30, unique=True)
+    num_of_days = models.IntegerField(verbose_name="number of days in this period", null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):

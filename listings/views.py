@@ -175,6 +175,8 @@ class ListingListCreateView(generics.ListCreateAPIView):
         main_listing["listing_type"] = request.data.get("main_listing[listing_type]")
         main_listing["property_price"] = request.data.get("main_listing[property_price]")
         main_listing["listing_currency"] = request.data.get("main_listing[listing_currency]")
+        main_listing["listing_term"] = request.data.get("main_listing[listing_term]")
+        main_listing["description"] = request.data.get("main_listing[description]")
         main_listing["deposit_in_months"] = request.data.get("main_listing[deposit_in_months]")
         main_listing["property"] = request.data.get("main_listing[property]")
         main_listing["sub_property"] = request.data.get("main_listing[sub_property]")
@@ -415,6 +417,13 @@ class PublicListingListView(generics.ListAPIView):
                                                         listing_state = LISTING_STATE_ACTIVE,
                                                         is_expired=False,
                                                         is_approved=True,
-                                                        )
+                                                        ).order_by("-listed_on")
         # print("LISTINGS: ",listings)
         return listings
+
+
+class PublicListingRetrieveView(generics.RetrieveAPIView):
+    queryset = list_models.MainListing.objects.all()
+    serializer_class = list_serializers.PublicListingDtailSerializer
+    # pagination_class = PublicListingPagination
+    # permission_classes = [IsAuthenticated,]

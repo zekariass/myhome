@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from listings import models as list_models
 from commons import serializers as cmn_serializers
+from agents import serializers as agent_serializers
+from myhome import strings
 # import properties.serializers as ser
 
 class ListingModeSerializer(serializers.ModelSerializer):
@@ -27,9 +29,10 @@ class MainListingSerializer(serializers.ModelSerializer):
 
 class MainListingPublicSerializer(serializers.ModelSerializer):
     address = cmn_serializers.AddressSerializer(read_only=True)
-    # property = serializers.SerializerMethodField("get_property")
+    number_of_baths = serializers.SerializerMethodField()
+    number_of_bed_rooms = serializers.SerializerMethodField()
     property_images = serializers.SerializerMethodField()
-    # property = ser.PropertySerializer(read_only=True)
+    agent = agent_serializers.AgentSerializer(read_only=True)
     class Meta:
         model = list_models.MainListing
         fields = ("id",
@@ -45,9 +48,13 @@ class MainListingPublicSerializer(serializers.ModelSerializer):
             "payment",
             "listing_type",
             "listing_currency",
+            "listing_term",
+            "description",
             "agent",
             "address",
-            "property_images"
+            "property_images",
+            "number_of_baths",
+            "number_of_bed_rooms",
             )
     
     # def get_property(self, obj):
@@ -62,7 +69,75 @@ class MainListingPublicSerializer(serializers.ModelSerializer):
         image_instances = PropertyImage.objects.filter(property=obj.property.id)
         images =  PropertyImageSerializer(image_instances, many=True, context=self.context)
         return images.data
+    
+    def get_number_of_baths(self, obj):
+        cat_key = obj.property.property_category.cat_key
+        if cat_key==strings.VILLA_KEY:
+            return obj.property.villa.number_of_baths
+        elif cat_key==strings.CONDOMINIUM_KEY:
+            return obj.property.condominium.number_of_baths
+        elif cat_key==strings.SHARE_HOUSE_KEY:
+            return obj.property.share_house.total_number_of_baths
+        elif cat_key==strings.APARTMENT_KEY:
+            apartment = obj.property.apartment
+            # return apartment.apartment_units.number_of_baths
+            print("YOOOOOOOO: ",apartment.apartment_units)
+            return None
+        else:
+            return None
+
+    def get_number_of_bed_rooms(self, obj):
+        cat_key = obj.property.property_category.cat_key
+        if cat_key==strings.VILLA_KEY:
+            return obj.property.villa.number_of_bed_rooms
+        elif cat_key==strings.CONDOMINIUM_KEY:
+            return obj.property.condominium.number_of_bed_rooms
+        elif cat_key==strings.SHARE_HOUSE_KEY:
+            return obj.property.share_house.total_number_of_bed_rooms
+        # elif cat_key==strings.APARTMENT_KEY:
+        #     return obj.property.apartment.apartment_units.number_of_bed_rooms
+        else:
+            return None
  
+
+
+class PublicListingDtailSerializer(serializers.ModelSerializer):
+    # address = cmn_serializers.AddressSerializer(read_only=True)
+    # number_of_baths = serializers.SerializerMethodField()
+    # number_of_bed_rooms = serializers.SerializerMethodField()
+    property = serializers.SerializerMethodField()
+    # agent = agent_serializers.AgentSerializer(read_only=True)
+    class Meta:
+        model = list_models.MainListing
+        fields = ("id",
+            "listing_state",
+            "listing_mode",
+            "property_price",
+            "deposit_in_months",
+            "is_approved",
+            "is_expired",
+            "listed_on",
+            "property",
+            "property_category",
+            "payment",
+            "listing_type",
+            "listing_currency",
+            "listing_term",
+            "description",
+            # "agent",
+            # "address",
+            # "property_images",
+            # "number_of_baths",
+            # "number_of_bed_rooms",
+            )
+
+    def get_property(self, obj):
+        from properties.serializers import PropertySerializer
+        from properties.models import Property
+        property_instance = Property.objects.get(pk=obj.property.id)
+        property_detail =  PropertySerializer(property_instance, context=self.context)
+        return property_detail.data
+
 
 class MainListingBasicCreateSerializer(serializers.ModelSerializer):
     class Meta:

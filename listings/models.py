@@ -5,6 +5,7 @@ import properties.models as prop_models
 from payments import models as pymnt_models
 from agents import models as agent_models
 from systems import models as sys_models
+from commons import models as cmn_models
 import myhome.strings
 from django.conf import settings
 
@@ -70,10 +71,12 @@ class MainListing(models.Model):
     listing_mode = models.CharField(max_length=50, choices=LISTING_MODES, default=LISTING_MODES[1][0], null=True)
     property_price = models.FloatField(verbose_name="property price", default=0.00)
     listing_currency = models.ForeignKey(sys_models.Currency ,verbose_name="property price currency type", on_delete=models.SET_NULL, null=True)
+    listing_term = models.ForeignKey(cmn_models.Periodicity ,verbose_name="listing term (i.e. per month, per year)", on_delete=models.SET_NULL, null=True)
     deposit_in_months = models.SmallIntegerField(verbose_name="number of months that deposit is required", default=0)
     is_approved = models.BooleanField(default=False)
     is_expired = models.BooleanField(default=False)
     agent = models.ForeignKey(agent_models.Agent, on_delete=models.CASCADE, verbose_name='agent who creates this listing', null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     listed_on = models.DateTimeField(default=timezone.now, editable=False)
 
     def save(self, *args, **kwargs):

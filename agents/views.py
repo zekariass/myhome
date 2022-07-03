@@ -87,7 +87,10 @@ class AgentRetrieveView(APIView):
                 return Response(data="No Agent found!", status=status.HTTP_404_NOT_FOUND)
             
 
-
+class AgentRetrieveByIDView(generics.RetrieveAPIView):
+    serializer_class = serializers.AgentSerializer
+    queryset = agnt_models.Agent.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 #========================================================================================================
 
 class AgentLogoCreateView(generics.CreateAPIView):

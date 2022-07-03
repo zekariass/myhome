@@ -168,6 +168,10 @@ class Property(models.Model):
     point_of_interest = models.ManyToManyField(PointOfInterest, related_name='near_by_properties', through='PropertyPOI', blank=True)
     amenity = models.ManyToManyField(Amenity, related_name='linked_properties', through='PropertyAmenity', blank=True)
 
+    @property
+    def cat_key(self):
+        return self.property_category.cat_key
+
     def __str__(self):
         return '%d %s' % (self.pk, self.property_category.name)
 
@@ -219,7 +223,7 @@ class Apartment(models.Model, CommonPropertiesMixin):
         super(Apartment, self).save(*args, **kwargs)
     
     def __str__(self):
-        return 'Apartment on floor %s' % (self.floor)
+        return 'Apartment on floor %s' % (self.floors)
 
 """An apartment will have at lest one unit"""
 class ApartmentUnit(models.Model):

@@ -35,3 +35,9 @@ class AddressSerializer(ModelSerializer):
     class Meta:
         model = cmn_models.Address
         fields = "__all__"
+
+
+class PeriodicitySerializer(ModelSerializer):
+    class Meta:
+        model = cmn_models.Periodicity
+        fields = "__all__"
