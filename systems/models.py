@@ -22,26 +22,40 @@ def get_system_asset_path(instance, filename):
     now = timezone.now()
     basename, extension = os.path.splitext(filename.lower())
     milliseconds = now.microsecond//1000
-    return f"systems/assets/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
+    return f"systems/assets/{instance.owner.name}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
-
-"""The system may be configurable with a variety of assets, such as pictures for logo, slider, etc"""
-class SystemAsset(models.Model):
-    asset_type = models.CharField(verbose_name="system asset type", max_length=50, unique=True, blank=False, null=False)
-    asset_path = models.FileField(verbose_name="asset file path", upload_to=get_system_asset_path)
-    asset_description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return "type: %s, path: %s" % (self.asset_type, self.asset_path)
 
 """System assets may be owned by a specific page or module"""
 class SystemAssetOwner(models.Model):
-    asset = models.ManyToManyField(SystemAsset, verbose_name="system asset")
-    owner = models.CharField(verbose_name="system owner page or sub-page", max_length=250)
+    SYSTEM_ASSET_OWNER_NAMES = [
+        ("APARTMENT_PICTURE", "Apartment Picture"),
+        ("VILLA_PICTURE", "Villa Picture"),
+        ("CONDOMINIUM_PICTURE", "Condominium Picture"),
+        ("TRADITIONAL_HOUSE_PICTURE", "Traditional House Picture"),
+        ("SHARE_HOUSE_PICTURE", "Share House Picture"),
+        ("COMMERCIAL_PROPERTY_PICTURE", "Commercial Property Picture"),
+        ("OFFICE_PICTURE", "Office Picture"),
+        ("HALL_PICTURE", "Hall Picture"),
+        ("LAND_PICTURE", "Land Picture"),
+        ("ALL_PURPOSE_PROPERTY_PICTURE", "All Purpose Property Picture"),
+       ("LANDING_PAGE_SLIDER", "Landing Page Slider"),
+    ]
+    # asset = models.ManyToManyField(SystemAsset, verbose_name="system asset")
+    name = models.CharField(verbose_name="name of owner of asset, (i.e. page, component)", choices=SYSTEM_ASSET_OWNER_NAMES, unique=True, max_length=250)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.owner
+        return self.name
+
+"""The system may be configurable with a variety of assets, such as pictures for logo, slider, etc"""
+class SystemAsset(models.Model):
+    owner = models.ForeignKey(SystemAssetOwner, on_delete=models.CASCADE, related_name="assets")
+    name = models.CharField(verbose_name="system asset name", max_length=50, blank=True, null=True)
+    asset = models.FileField(verbose_name="asset file path", upload_to=get_system_asset_path)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return "Owner: %s, path: %s" % (self.owner.name, self.name)
 
 
 """There might be a variety of parameters we may store so that the system can use them for doing 

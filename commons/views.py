@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ObjectDoesNotExist
 from commons import serializers
 from commons import models as cmn_models
 
@@ -54,13 +55,24 @@ class ListRegionByCountry(APIView):
         else:
             return Response(data="Country does not found", status=status.HTTP_404_NOT_FOUND)
 
+class ListRegionByCountryName(generics.ListAPIView):
+    queryset = cmn_models.Region.objects.all()
+    serializer_class = serializers.RegionSerializer
 
+    def get_queryset(self):
+        country_name = self.request.query_params.get("country")
+        try:
+            country = cmn_models.Country.objects.get(name=country_name)
+            regions = cmn_models.Region.objects.filter(country=country.id)
+            return regions
+        except ObjectDoesNotExist:
+            return None #Response(data="Country is not found!", status=status.HTTP_404_NOT_FOUND)
 
 class ListCityByRegion(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, format=None):
-        countryId = int(request.query_params.get("cityId"))
+        countryId = int(request.query_params.get("regionId"))
         regionObj = cmn_models.Region.objects.get(pk=countryId)
         if regionObj is not None:
             city_queryset = cmn_models.City.objects.filter(region=regionObj)

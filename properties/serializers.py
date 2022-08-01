@@ -147,11 +147,23 @@ class ShareHouseSerializer(serializers.ModelSerializer):
                 "agent")
 
 class ShareHouseCreateBasicSerializer(serializers.ModelSerializer):
+    house_type = HouseTypeSerializer(read_only=True)
+    class Meta:
+        model = prop_models.ShareHouse
+        exclude = ("property",)
+
+class ShareHouseCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.ShareHouse
         exclude = ("property",)
 #===========COMMERCIAL PROPERTY============================================================
 class CommercialPropertyCreateBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.CommercialProperty
+        exclude = ("property",)
+
+class CommercialPropertyWithBuildingTypeSerializer(serializers.ModelSerializer):
+    building_type = BuildingTypeSerializer(read_only=True)
     class Meta:
         model = prop_models.CommercialProperty
         exclude = ("property",)
@@ -224,6 +236,12 @@ class AllPurposePropertySerializer(serializers.ModelSerializer):
                 "is_multi_unit",
                 "agent")
 
+class AllPurposePropertyWithBuildingTypeSerializer(serializers.ModelSerializer):
+    building_type = BuildingTypeSerializer(read_only=True)
+    class Meta:
+        model = prop_models.AllPurposeProperty
+        exclude = ("property",)
+
 class AllPurposePropertyCreateBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = prop_models.AllPurposeProperty
@@ -268,6 +286,12 @@ class HallSerializer(serializers.ModelSerializer):
                 "agent")
 #===========OFFICE=========================================================================
 class OfficeCreateBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = prop_models.Office
+        exclude = ("property",)
+
+class OfficeWithBuildingTypeSerializer(serializers.ModelSerializer):
+    building_type = BuildingTypeSerializer(read_only=True)
     class Meta:
         model = prop_models.Office
         exclude = ("property",)
@@ -450,7 +474,8 @@ class PropertyCreateBasicSerializer(serializers.ModelSerializer):
 class PropertySerializer(serializers.ModelSerializer):
     property_category = PropertyCategorySerializer()
     address = cmn_serializers.AddressSerializer(read_only=True)
-    agent = agnt_serializers.AgentSerializer(read_only=True)
+    # agent = agnt_serializers.AgentSerializer(read_only=True)
+    agent = agnt_serializers.AgentFullDataSerializer(read_only=True)
     education_facility = EducationFacilitySerializer(many=True,read_only=True)
     transport_facility = TransportFacilitySerializer(many=True,read_only=True)
     point_of_interest = PointOfInterestSerializer(many=True,read_only=True)
@@ -495,11 +520,11 @@ class PropertySerializer(serializers.ModelSerializer):
         elif hasattr(instance, "share_house"):
             return ShareHouseCreateBasicSerializer(instance=prop_models.ShareHouse.objects.get(property=instance.id),read_only=True).data
         elif hasattr(instance, "commercial_property"):
-            return CommercialPropertyCreateBasicSerializer(instance=prop_models.CommercialProperty.objects.get(property=instance.id),read_only=True).data
+            return CommercialPropertyWithBuildingTypeSerializer(instance=prop_models.CommercialProperty.objects.get(property=instance.id),read_only=True).data
         elif hasattr(instance, "all_purpose_property"):
-            return AllPurposePropertyCreateBasicSerializer(instance=prop_models.AllPurposeProperty.objects.get(property=instance.id),read_only=True).data
+            return AllPurposePropertyWithBuildingTypeSerializer(instance=prop_models.AllPurposeProperty.objects.get(property=instance.id),read_only=True).data
         elif hasattr(instance, "office"):
-            return OfficeCreateBasicSerializer(instance=prop_models.Office.objects.get(property=instance.id),read_only=True).data
+            return OfficeWithBuildingTypeSerializer(instance=prop_models.Office.objects.get(property=instance.id),read_only=True).data
         elif hasattr(instance, "hall"):
             return HallCreateBasicSerializer(instance=prop_models.Hall.objects.get(property=instance.id),read_only=True).data
         elif hasattr(instance, "land"):

@@ -1138,3 +1138,21 @@ class ListingPriceByCategoryListCreateView(generics.ListCreateAPIView):
             return Response(data=self.get_serializer(property_prices, many=True).data, status=status.HTTP_200_OK)
         else:
             return Response(data=[], status=status.HTTP_404_NOT_FOUND)
+
+
+#=========================================================================================================
+class ApartmentUnitRetrievePublicView(generics.RetrieveAPIView):
+    queryset = prop_models.ApartmentUnit.objects.all()
+    serializer_class = prop_serializers.ApartmentUnitSerializer
+
+
+#=========================================================================================================
+class CommercialPropertyUnitRetrievePublicView(generics.RetrieveAPIView):
+    queryset = prop_models.CommercialPropertyUnit.objects.all()
+    serializer_class = prop_serializers.CommercialPropertyUnitSerializer
+
+
+#=========================================================================================================
+class AllPurposePropertyUnitRetrievePublicView(generics.RetrieveAPIView):
+    queryset = prop_models.AllPurposePropertyUnit.objects.all()
+    serializer_class = prop_serializers.AllPurposePropertyUnitSerializer

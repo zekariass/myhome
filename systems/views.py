@@ -21,3 +21,8 @@ class CurrencyListView(generics.ListAPIView):
     queryset = sys_models.Currency.objects.all()
     serializer_class = sys_serializers.CurrencySerializer
     permission_classes = [AllowAny,]
+
+class SystemAssetListCreateView(generics.ListCreateAPIView):
+    queryset = sys_models.SystemAsset.objects.all()
+    serializer_class = sys_serializers.SystemAssetSerializer
+    permission_classes = [AllowAny,]

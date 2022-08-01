@@ -18,4 +18,7 @@ urlpatterns = [
     path("<int:pk>/update/", views.MainListingRetrieveUpdateDestroyView.as_view(), name="listing-update"),
     path("<int:pk>/delete/", views.MainListingRetrieveUpdateDestroyView.as_view(), name="listing-delete"),
 
+    path("save/", views.SavedListingCreateView.as_view(), name="save-listing"),
+    path("<int:pk>/unsave/", views.SavedListingDestroyView.as_view(), name="unsaved-listing"),
+    path("saved/list/", views.SavedListingListView.as_view(), name="saved-listing-list"),
 ]

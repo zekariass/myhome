@@ -432,7 +432,7 @@ class Land(models.Model, CommonPropertiesMixin):
         super(Land, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s area land' % (self.area)
+        return '%s area land' % (self.area) 
 
 
 """Versatile property is all fit property that can be used for commercial purposes, offices, or even for residence"""

@@ -78,7 +78,7 @@ urlpatterns = [
     path('apartmentunit/<int:pk>/delete/', views.ApartmentUnitRetrieveUpdateDestroyView.as_view(), name="apartment-unit-delete"),
     path('apartmentunit/<int:pk>/update/', views.ApartmentUnitRetrieveUpdateDestroyView.as_view(), name="apartment-unit-update"),
     path('apartmentunit/create/', views.ApartmentUnitCreateView.as_view(), name="apartment-unit-create"),
-    # path('apartment/<int:pk>/detail/', views.ApartmentRetrieveUpdateDestroyView.as_view(), name="apartment-detail"),
+    path('apartmentunit/<int:pk>/detail/public/', views.ApartmentUnitRetrievePublicView.as_view(), name="apartment-public-detail"),
     path('apartmentunit/list-by-apartment/', views.ApartmentUnitByApartmentView.as_view(), name="apartment-unit-list-by-apartment"),
 
     #VILLA
@@ -110,6 +110,7 @@ urlpatterns = [
     path('commercialpropertyunit/<int:pk>/update/', views.CommercialPropertyUnitRetrieveUpdateDestroyView.as_view(), name="commercialpropertyunit-update"),
     path('commercialpropertyunit/create/', views.CommercialPropertyUnitCreateView.as_view(), name="commercialpropertyunit-create"),
     # path('commercialpropertyunit/<int:pk>/detail/', views.CommercialPropertyUnitRetrieveUpdateDestroyView.as_view(), name="commercialpropertyunit-detail"),
+    path('commercialpropertyunit/<int:pk>/detail/public/', views.CommercialPropertyUnitRetrievePublicView.as_view(), name="commercialproperty-public-detail"),
     path('commercialpropertyunit/list-by-commercialproperty/', views.CommercialPropertyUnitByCommercialPropertyView.as_view(), name="commercialpropertyunit-list-by-commercialproperty"),
 
     #SHARE HOUSE
@@ -141,6 +142,7 @@ urlpatterns = [
     path('allpurposepropertyunit/<int:pk>/update/', views.AllPurposePropertyUnitRetrieveUpdateDestroyView.as_view(), name="allpurposepropertyunit-update"),
     path('allpurposepropertyunit/create/', views.AllPurposePropertyUnitCreateView.as_view(), name="allpurposepropertyunit-create"),
     # path('allpurposepropertyunit/<int:pk>/detail/', views.AllPurposePropertyUnitRetrieveUpdateDestroyView.as_view(), name="allpurposepropertyunit-detail"),
+    path('allpurposepropertyunit/<int:pk>/detail/public/', views.AllPurposePropertyUnitRetrievePublicView.as_view(), name="allpurposepropertyunit-public-detail"),
     path('allpurposepropertyunit/list-by-allpurposeproperty/', views.AllPurposePropertyUnitByAllPurposePropertyView.as_view(), name="allpurposepropertyunit-list-by-allpurposeproperty"),
 
 

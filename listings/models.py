@@ -98,6 +98,11 @@ class SavedListing(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_listing")
     saved_on = models.DateTimeField(default=timezone.now, editable=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["main_listing","user"], name="unique_saved_listing_per_user_constraint")
+        ]
+
 
 """Each featured listing has a specific state, such as active, inactive, expired, etc"""
 class FeaturedListingState(models.Model):

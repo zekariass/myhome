@@ -427,3 +427,52 @@ class PublicListingRetrieveView(generics.RetrieveAPIView):
     serializer_class = list_serializers.PublicListingDtailSerializer
     # pagination_class = PublicListingPagination
     # permission_classes = [IsAuthenticated,]
+
+
+# class RetrieveApartmentUnitView(generics.RetrieveAPIView):
+#     queryset = list_models.MainListing.objects.all()
+#     serializer_class = list_serializers.PublicListingDtailSerializer
+
+
+class SavedListingCreateView(generics.CreateAPIView):
+    queryset = list_models.SavedListing.objects.all()
+    serializer_class = list_serializers.SavedListingSerialier
+    permission_classes = [IsAuthenticated,]
+
+    def post(self, request, format=None):
+        user = request.user
+        if user.is_anonymous:
+            return Response(data="You must signed in!", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            save_listing_serializer = list_serializers.SavedListingSerialier(data=request.data)
+            if save_listing_serializer.is_valid():
+                save_listing_serializer.save(user=user)
+                return Response(data=save_listing_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(data="Data is not valid!", status=status.HTTP_400_BAD_REQUEST)
+
+class SavedListingDestroyView(generics.DestroyAPIView):
+    queryset = list_models.SavedListing.objects.all()
+    serializer_class = list_serializers.SavedListingSerialier
+    permission_classes = [IsAuthenticated,]
+
+    def delete(self, request, pk, format=None):
+        user = request.user
+        if user.is_anonymous:
+            return Response(data="You must signed in!", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            list_models.SavedListing.objects.get(user=user.id, main_listing=pk).delete()
+            return Response(data=None, status=status.HTTP_200_OK)
+
+class SavedListingListView(generics.ListAPIView):
+    queryset = list_models.SavedListing.objects.all()
+    serializer_class = list_serializers.SavedListingListSerialier
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return Response(data="You must signed in!", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            saved_listing_for_user = list_models.SavedListing.objects.filter(user=user.id).order_by("-saved_on")
+            return saved_listing_for_user
