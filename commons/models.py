@@ -31,6 +31,7 @@ class City(models.Model):
     code = models.CharField(verbose_name='city code', max_length=10, blank=True)
     latitute = models.CharField(verbose_name='geo latitued', max_length=20, null=True, blank=True)
     longitude = models.CharField(verbose_name='geo longitude', max_length=20, null=True, blank=True)
+    is_popular = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

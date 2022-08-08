@@ -105,3 +105,13 @@ class PeriodicityListView(generics.ListAPIView):
     queryset = cmn_models.Periodicity.objects.all()
     serializer_class = serializers.PeriodicitySerializer
     permission_classes = [AllowAny,]
+
+
+class PopularCityListView(generics.ListAPIView):
+    queryset = cmn_models.City.objects.all()
+    serializer_class = serializers.CitySerializer
+    permission_classes = [AllowAny,]
+
+    def get_queryset(self):
+        popular_cities = cmn_models.City.objects.filter(is_popular=True)
+        return popular_cities

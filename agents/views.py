@@ -9,8 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from agents import serializers, models as agnt_models
 from commons import models as cmn_models
 from commons import serializers as cmn_serializers
-
-
+from django.db.models import Q
 
 class AgentCreateView(generics.CreateAPIView):
     """
@@ -62,7 +61,7 @@ class AgentCreateView(generics.CreateAPIView):
 
 #========================================================================================================
 
-class AgentRetrieveView(APIView):
+class AgentRetrieveView(generics.RetrieveAPIView):
     """
     Get specific Agent with full data (including Address and Logo )
     """
@@ -73,23 +72,30 @@ class AgentRetrieveView(APIView):
 
     def get(self, request, **kwargs):
         user = request.user
+        # print("USER++++++++: ",user)
         try:
-            agent = agnt_models.Agent.objects.get(manager=user)
+            agent_admin = agnt_models.AgentAdmin.objects.get(admin=user.id)
+            agent = agnt_models.Agent.objects.get(pk=agent_admin.agent.pk)
             serialized_data = serializers.AgentFullDataSerializer(agent, context={"request": request})
             return Response(data=serialized_data.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            try:
-                agent_admin = agnt_models.AgentAdmin.objects.get(admin=user)
-                agent = agnt_models.Agent.objects.get(pk=agent_admin.agent.pk)
-                serialized_data = serializers.AgentFullDataSerializer(agent, context={"request": request})
-                return Response(data=serialized_data.data, status=status.HTTP_200_OK)
-            except ObjectDoesNotExist:
-                return Response(data="No Agent found!", status=status.HTTP_404_NOT_FOUND)
+            # try:
+            #     agent_admin = agnt_models.AgentAdmin.objects.get(admin=user.id)
+            #     agent = agnt_models.Agent.objects.get(pk=agent_admin.agent.pk)
+            #     serialized_data = serializers.AgentFullDataSerializer(agent, context={"request": request})
+            #     return Response(data=serialized_data.data, status=status.HTTP_200_OK)
+            # except ObjectDoesNotExist:
+            return Response(data="No Agent found!", status=status.HTTP_404_NOT_FOUND)
             
 
 class AgentRetrieveByIDView(generics.RetrieveAPIView):
     serializer_class = serializers.AgentSerializer
     queryset = agnt_models.Agent.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class AgentRetrieveByIDPublicView(generics.RetrieveAPIView):
+    queryset = agnt_models.Agent.objects.all()
+    serializer_class = serializers.AgentFullDataSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 #========================================================================================================
 
@@ -135,3 +141,19 @@ class AgentLogoCreateView(generics.CreateAPIView):
 class AgentLogoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.AgentLogoSerializer
     queryset = agnt_models.AgentLogo.objects.all()
+
+
+class AgentListByLocation(generics.ListAPIView):
+    serializer_class = serializers.AgentFullDataSerializer
+    queryset = agnt_models.Agent.objects.all()
+
+    def get_queryset(self):
+        location = self.request.query_params.get("location")
+
+        agent_list = agnt_models.Agent.objects.filter(Q(address__city__name__icontains=location)| \
+                                                      Q(address__post_code__icontains=location)| \
+                                                      Q(address__street__icontains=location))
+
+        return agent_list
+
+

@@ -104,28 +104,52 @@ class SavedListing(models.Model):
         ]
 
 
+# """Each featured listing has a specific state, such as active, inactive, expired, etc"""
+# class FeaturedListingState(models.Model):
+#     state = models.CharField(verbose_name="featured listing state", max_length=50, unique=True, null=False, blank=False)
+#     description = models.TextField(null=True, blank=True)
+
+#     def __str__(self):
+#         return self.state
+
 """Each featured listing has a specific state, such as active, inactive, expired, etc"""
-class FeaturedListingState(models.Model):
-    state = models.CharField(verbose_name="featured listing state", max_length=50, unique=True, null=False, blank=False)
+class FeaturePrice(models.Model):
+    PRICE_STATE = [
+        ("ACTIVE","Active"),
+        ("INACTIVE","Inactive")
+    ]
+    price = models.FloatField(verbose_name="listing featuring price", default=0.00)
+    price_state = models.CharField(verbose_name="listing featuring price", max_length=50, choices=PRICE_STATE)
     description = models.TextField(null=True, blank=True)
+    added_on = models.DateTimeField(default=timezone.now, editable=False)
+
 
     def __str__(self):
-        return self.state
+        return f"Price: {self.price}"
 
 """An agent may pay more to feature their specific listing. When a listing is featured, it will show up 
     on more searches than normal searches and allows it to be listed on the landing page"""
 class FeaturedListing(models.Model):
+    FEATURED_LISTING_STATE = [
+        ("ACTIVE","Active"),
+        ("INACTIVE","Inactive"),
+        ("EXPIRED","Expired"),
+    ]
     main_listing = models.ForeignKey(MainListing, on_delete=models.CASCADE, related_name="features")
-    feature_payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.CASCADE)
-    featured_listing_state = models.ForeignKey(FeaturedListingState, on_delete=models.SET_DEFAULT, default="EXPIRED")
+    payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.CASCADE)
+    feature_price = models.ForeignKey(FeaturePrice, on_delete=models.SET_NULL, null=True, blank=True)
+    featured_listing_state = models.CharField(verbose_name="featured listing state", max_length=50, choices=FEATURED_LISTING_STATE)
+    is_approved = models.BooleanField(default=False)
     featured_on = models.DateTimeField(default=timezone.now, editable=False)
-    expire_on = models.DateTimeField(editable=True, null=False, blank=False)
+    # expire_on = models.DateTimeField(editable=True, null=False, blank=False)
 
     # class Meta:
     #     constraints = [
     #         models.UniqueConstraint(fields=["main_listing","featured_listing_state"], name="single_state_featured_listing")
     #     ]
 
+    def __str__(self):
+        return f"Id: {self.id}, State: {self.featured_listing_state}, Is_Approved: {self.is_approved}"
 
 #NEWLY ADDED TABLES FOR LISTING BY PROPERTY CATEGORY
 

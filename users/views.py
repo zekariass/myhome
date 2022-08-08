@@ -77,11 +77,16 @@ class MyHomeUserDetailUpdateView(generics.RetrieveUpdateAPIView):
         """
         Handler method to get a specific user detail
         """
-        user_model = u_models.MyHomeUser
-        user_instance= user_model.objects.filter(pk=pk)
-        # print("USER: ", user_instance)
-        user_serializer = self.get_serializer(user_instance)
-        return Response(user_serializer.data)
+        # user_model = u_models.MyHomeUser
+        # user_instance= user_model.objects.filter(pk=pk)
+        # # print("USER: ", user_instance)
+        # user_serializer = self.get_serializer(user_instance)
+        user =  request.user
+        print("=================>: ",user)
+        if user.is_authenticated:
+            return Response(data=serializers.MyHomeUserSerializer(user).data, status=status.HTTP_200_OK)
+        else:
+            return Response(data="User is not authenticated!", status=status.HTTP_401_UNAUTHORIZED)
 
     
 

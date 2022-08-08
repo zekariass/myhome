@@ -21,4 +21,10 @@ urlpatterns = [
     path("save/", views.SavedListingCreateView.as_view(), name="save-listing"),
     path("<int:pk>/unsave/", views.SavedListingDestroyView.as_view(), name="unsaved-listing"),
     path("saved/list/", views.SavedListingListView.as_view(), name="saved-listing-list"),
+
+    #FEATURE PRICE
+    path("feature/get-active-price/", views.GetActiveFeaturePriceView.as_view(), name="feature-get-active-price"),
+    path("feature/", views.FeaturedListingCreateView.as_view(), name="feature-listing"),
+    path("featured/list/", views.FeaturedListingListView.as_view(), name="featured-listing-list"),
+
 ]

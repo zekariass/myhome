@@ -228,3 +228,20 @@ class SavedListingListSerialier(serializers.ModelSerializer):
     class Meta:
         model = list_models.SavedListing
         exclude = ("user",)
+
+class FeaturePriceSerialier(serializers.ModelSerializer):
+    class Meta:
+        model = list_models.FeaturePrice
+        fields = "__all__"
+
+
+class FeaturedListingSerialier(serializers.ModelSerializer):
+    class Meta:
+        model = list_models.FeaturedListing
+        fields = ("main_listing",)
+
+class FeaturedListingWithMainListingDetailSerialier(serializers.ModelSerializer):
+    main_listing = MainListingPublicSerializer(read_only=True)
+    class Meta:
+        model = list_models.FeaturedListing
+        fields = ("main_listing","featured_on",)
