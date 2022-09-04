@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from matplotlib.style import context
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ from listings.paginations import FeaturedListingPagination
 from payments import serializers as pay_serializers
 from payments import models as pay_models
 from properties import models as prop_models
+from properties import serializers as prop_serializers
 from django.http.request import QueryDict
 from django.db.models import Q
 
@@ -682,3 +684,41 @@ class FeaturedListingListView(generics.ListAPIView):
                                                     featured_listing_state=FEATURED_LISTING_ACTIVE, is_approved=True) \
                                                     .order_by("-featured_on")
         return active_and_approved_featured_listings
+
+
+class ListingPropertyImagesListView(generics.ListAPIView):
+    queryset = prop_models.PropertyImage.objects.all()
+    serializer_class = prop_serializers.PropertyImageSerializer
+    # pagination_class = FeaturedListingPagination
+
+    def get(self, request, pk=None, format=None):
+        # print("++++++======>PK======>++++++: ", pk)
+        try:
+            listing_instance = list_models.MainListing.objects.get(id=pk)
+        except:
+            return Response(data="Listing not found!", status=status.HTTP_404_NOT_FOUND)
+
+        image_list = prop_models.PropertyImage.objects.filter(property=listing_instance.property.id)
+
+        # print("HEYYYYYYYYYYYYYYYYY====================>: ",image_list)
+
+        return Response(prop_serializers.PropertyImageSerializer(image_list, many=True, context={"request": request}).data, status=status.HTTP_200_OK)
+
+
+class ListingPropertyVideoListView(generics.ListAPIView):
+    queryset = prop_models.PropertyImage.objects.all()
+    serializer_class = prop_serializers.PropertyVideoSerializer
+    # pagination_class = FeaturedListingPagination
+
+    def get(self, request, pk=None, format=None):
+        # print("++++++======>PK======>++++++: ", pk)
+        try:
+            listing_instance = list_models.MainListing.objects.get(id=pk)
+        except:
+            return Response(data="Listing not found!", status=status.HTTP_404_NOT_FOUND)
+
+        video_list = prop_models.PropertyVideo.objects.filter(property=listing_instance.property.id)
+
+        # print("HEYYYYYYYYYYYYYYYYY====================>: ",video_list)
+
+        return Response(prop_serializers.PropertyVideoSerializer(video_list, many=True, context={"request": request}).data, status=status.HTTP_200_OK)

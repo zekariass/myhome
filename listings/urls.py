@@ -27,4 +27,8 @@ urlpatterns = [
     path("feature/", views.FeaturedListingCreateView.as_view(), name="feature-listing"),
     path("featured/list/", views.FeaturedListingListView.as_view(), name="featured-listing-list"),
 
+    #LISTING PROPERTY MEDIA
+    path("<int:pk>/property/image/list/", views.ListingPropertyImagesListView.as_view(), name="listing-property-image-list"),
+    path("<int:pk>/property/video/list/", views.ListingPropertyVideoListView.as_view(), name="listing-property-video-list"),
+
 ]
