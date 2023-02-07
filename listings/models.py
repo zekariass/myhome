@@ -12,7 +12,7 @@ from django.conf import settings
 """A listing mode can be selected automatically appropriate for the current user. 
     A listing can be free of any charge, subscription-based, or payment mode"""
 class ListingMode(models.Model):
-    mode = models.CharField(verbose_name="payment mode", max_length=50, unique=True, null=False, blank=False)
+    mode = models.CharField(verbose_name="payment mode", max_length=56, unique=True, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
