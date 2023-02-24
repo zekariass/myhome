@@ -6,7 +6,6 @@ from payments import models as pymnt_models
 from agents import models as agent_models
 from systems import models as sys_models
 from commons import models as cmn_models
-import myhome.strings
 from django.conf import settings
 
 """A listing mode can be selected automatically appropriate for the current user. 
@@ -64,6 +63,7 @@ class MainListing(models.Model):
 
     property = models.ForeignKey(prop_models.Property, on_delete=models.CASCADE, related_name="listings")
     payment = models.OneToOneField(pymnt_models.Payment, on_delete=models.SET_NULL, null=True, related_name="listing")
+    #Listing type must be changed to char field, because it has always 2 values
     listing_type = models.ForeignKey(ListingType, on_delete=models.SET_NULL, null=True, related_name="listings_in_this_type")
     # listing_state = models.ForeignKey(ListingState, on_delete=models.SET_NULL, null=True, related_name="listings_in_this_state")
     # listing_mode = models.ForeignKey(ListingMode, on_delete=models.SET_NULL, null=True, related_name="listings_in_this_mode")
@@ -71,6 +71,7 @@ class MainListing(models.Model):
     listing_mode = models.CharField(max_length=50, choices=LISTING_MODES, default=LISTING_MODES[1][0], null=True)
     property_price = models.FloatField(verbose_name="property price", default=0.00)
     listing_currency = models.ForeignKey(sys_models.Currency ,verbose_name="property price currency type", on_delete=models.SET_NULL, null=True)
+    #Listing term is changed to rent payment period. and must be changed to char field
     listing_term = models.ForeignKey(cmn_models.Periodicity ,verbose_name="listing term (i.e. per month, per year)", on_delete=models.SET_NULL, null=True)
     deposit_in_months = models.SmallIntegerField(verbose_name="number of months that deposit is required", default=0)
     is_approved = models.BooleanField(default=False)
