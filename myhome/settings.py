@@ -95,13 +95,22 @@ DATABASES = {
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
 
-     'default': {
+    #  'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': 'myhomedb',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'Zakinfo@23',
+    #     'HOST': '127.0.0.1',
+    #     'PORT': '5555',
+    # }
+
+    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myhomedb',
-        'USER': 'postgres',
-        'PASSWORD': 'Zakinfo@23',
-        'HOST': '127.0.0.1',
-        'PORT': '5555',
+        'NAME': os.environ['dbname'],
+        'USER': os.environ['user'],
+        'PASSWORD': os.environ['password'],
+        'HOST': 'happymovebackend-server.postgres.database.azure.com',
+        'PORT': '5432',
     }
 }
 
