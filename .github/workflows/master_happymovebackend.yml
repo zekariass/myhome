@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'happymovebackend'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AFD6FE6441F6437E93E80D80E0AC7AFC }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A3E0CDC01D8D473F9F1F2E02B6125998 }}
